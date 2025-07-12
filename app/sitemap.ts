@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://skillcircle.com' // Replace with your actual domain
+  const baseUrl = 'https://circleskills.vercel.app'
   const currentDate = new Date()
 
   return [
