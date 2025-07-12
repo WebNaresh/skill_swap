@@ -53,6 +53,12 @@ export function Navbar() {
                 >
                   My Requests
                 </Link>
+                <Link
+                  href="/opensource"
+                  className="text-gray-600 hover:text-sky-600 transition-colors font-medium"
+                >
+                  Open Source
+                </Link>
               </>
             ) : (
               <>

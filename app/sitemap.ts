@@ -45,6 +45,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
 
+    // Open source and community pages
+    {
+      url: `${baseUrl}/opensource`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+
     // Legal and policy pages - Lower priority, infrequent changes
     {
       url: `${baseUrl}/terms`,

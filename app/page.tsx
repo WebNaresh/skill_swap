@@ -271,6 +271,103 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Open Source Section */}
+      <section className="py-20 bg-gradient-to-br from-sky-600 via-blue-600 to-indigo-700 text-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-full text-sm font-medium mb-8 backdrop-blur-sm">
+              <BookOpen className="h-4 w-4" />
+              Open Source Project
+            </div>
+
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
+              Built for the Community, by the Community
+            </h2>
+
+            <p className="text-xl text-sky-100 mb-8 leading-relaxed">
+              SkillCircle is proudly open source, fostering transparency,
+              collaboration, and community-driven development. Join us in
+              building the future of skill exchange.
+            </p>
+
+            <div className="grid md:grid-cols-3 gap-8 mb-12">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+                  <Globe className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-white">
+                  Open Development
+                </h3>
+                <p className="text-sky-100">
+                  Transparent development process with community input and
+                  collaboration
+                </p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+                  <Users className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-white">
+                  Community Driven
+                </h3>
+                <p className="text-sky-100">
+                  Features and improvements guided by user feedback and
+                  contributions
+                </p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+                  <Heart className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-white">
+                  Free Forever
+                </h3>
+                <p className="text-sky-100">
+                  Committed to keeping skill exchange accessible to everyone,
+                  always
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white/10 rounded-2xl p-8 border border-white/20 backdrop-blur-sm">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="text-left">
+                  <h3 className="text-xl font-semibold mb-2 text-white">
+                    Thanks to NaviByte Innovation
+                  </h3>
+                  <p className="text-sky-100">
+                    Special acknowledgment to NaviByte Innovation for their
+                    exceptional development work and commitment to open source
+                    principles.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <a
+                    href="https://github.com/WebNaresh/skill_swap"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-3 bg-white text-sky-600 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-lg"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    View on GitHub
+                  </a>
+                  <a
+                    href="http://navibyte.in/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-3 border-2 border-white text-white rounded-lg font-medium hover:bg-white hover:text-sky-600 transition-colors"
+                  >
+                    Visit NaviByte
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials Section */}
       <section className="py-20 bg-gradient-to-br from-sky-50 to-blue-50">
         <div className="container mx-auto px-4">
