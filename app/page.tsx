@@ -128,6 +128,155 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Top Contributors Section */}
+      <section className="py-20 bg-gradient-to-br from-sky-50 to-blue-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-sky-100 text-sky-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+                <Users className="h-4 w-4" />
+                Open Source Community
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Top Contributors
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Meet the amazing developers who are building SkillCircle and
+                making skill exchange accessible to everyone
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8 mb-12">
+              {/* Primary Contributor - WebNaresh */}
+              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-sky-200 relative">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <div className="bg-sky-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+                    Project Lead
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="relative mb-6">
+                    <div className="w-20 h-20 bg-gradient-to-br from-sky-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">
+                      WN
+                    </div>
+                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-5 h-5 text-white" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    WebNaresh
+                  </h3>
+                  <p className="text-sky-600 font-medium mb-3">
+                    Repository Owner & Lead Developer
+                  </p>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Created and maintains the entire SkillCircle platform.
+                    Passionate about building community-driven solutions.
+                  </p>
+                  <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mb-4">
+                    <Star className="w-4 h-4 text-yellow-500" />
+                    <span>500+ Commits</span>
+                  </div>
+                  <a
+                    href="https://github.com/WebNaresh"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-sky-600 text-white rounded-lg font-medium hover:bg-sky-700 transition-colors"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    View Profile
+                  </a>
+                </div>
+              </div>
+
+              {/* Community Contributor 1 */}
+              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-xl font-bold">
+                    CC
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    Community Contributor
+                  </h3>
+                  <p className="text-green-600 font-medium mb-3">
+                    UI/UX Improvements
+                  </p>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Enhanced user interface components and improved
+                    accessibility features across the platform.
+                  </p>
+                  <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mb-4">
+                    <Heart className="w-4 h-4 text-red-500" />
+                    <span>25+ Contributions</span>
+                  </div>
+                  <div className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg font-medium">
+                    Join Our Community
+                  </div>
+                </div>
+              </div>
+
+              {/* Community Contributor 2 */}
+              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-xl font-bold">
+                    DC
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    Documentation Contributor
+                  </h3>
+                  <p className="text-purple-600 font-medium mb-3">
+                    Documentation & Testing
+                  </p>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Improved project documentation, added comprehensive guides,
+                    and enhanced testing coverage.
+                  </p>
+                  <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mb-4">
+                    <BookOpen className="w-4 h-4 text-blue-500" />
+                    <span>15+ Contributions</span>
+                  </div>
+                  <div className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg font-medium">
+                    Join Our Community
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Call to Action */}
+            <div className="text-center">
+              <div className="bg-white rounded-2xl p-8 shadow-lg border border-sky-200">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                  Want to Contribute?
+                </h3>
+                <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                  Join our growing community of contributors and help make skill
+                  exchange accessible to everyone. Every contribution, big or
+                  small, makes a difference!
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link
+                    href="/opensource"
+                    className="px-8 py-4 bg-sky-600 text-white rounded-xl font-semibold hover:bg-sky-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center gap-2"
+                  >
+                    <Users className="h-5 w-5" />
+                    View All Contributors
+                  </Link>
+                  <a
+                    href="https://github.com/WebNaresh/skill_swap"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-8 py-4 border-2 border-sky-600 text-sky-600 rounded-xl font-semibold hover:bg-sky-50 transition-all duration-300 flex items-center justify-center gap-2"
+                  >
+                    <BookOpen className="h-5 w-5" />
+                    Contribute on GitHub
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Enhanced Features Section */}
       <section className="py-20 bg-gradient-to-br from-gray-50 to-sky-50">
         <div className="container mx-auto px-4">

@@ -100,29 +100,21 @@ export function Footer() {
                 Built with ❤️ for the learning community
               </span>
               <span className="hidden sm:inline text-gray-300">•</span>
-              <div className="flex items-center gap-3">
-                <span className="text-gray-600">Developed by</span>
-                <a
-                  href="http://navibyte.in/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-sky-600 hover:text-sky-700 font-medium transition-all duration-300 group"
-                  aria-label="Visit NaviByte Innovation website - opens in new tab"
-                >
-                  <div className="relative">
-                    <Image
-                      src="/navibyte-logo.png"
-                      alt="NaviByte Innovation Logo"
-                      width={36}
-                      height={36}
-                      className="rounded-lg shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all duration-300"
-                    />
-                  </div>
-                  <span className="text-lg font-semibold underline decoration-sky-600/30 group-hover:decoration-sky-700 group-hover:text-sky-800 transition-all duration-300">
-                    NaviByte Innovation
-                  </span>
-                </a>
-              </div>
+              <a
+                href="http://navibyte.in/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group transition-all duration-300"
+                aria-label="Visit NaviByte Innovation website - opens in new tab"
+              >
+                <Image
+                  src="/navibyte-logo.png"
+                  alt="NaviByte Innovation Logo"
+                  width={200}
+                  height={200}
+                  className="rounded-xl shadow-md group-hover:scale-110 group-hover:shadow-lg transition-all duration-300 hover:brightness-110"
+                />
+              </a>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-sm text-gray-500">
