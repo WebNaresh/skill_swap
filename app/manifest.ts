@@ -15,24 +15,6 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ['education', 'social', 'productivity'],
     icons: [
       {
-        src: '/favicon.svg',
-        sizes: '16x16',
-        type: 'image/svg+xml',
-        purpose: 'any'
-      },
-      {
-        src: '/logo.svg',
-        sizes: '64x64',
-        type: 'image/svg+xml',
-        purpose: 'any'
-      },
-      {
-        src: '/logo-large.svg',
-        sizes: '128x128',
-        type: 'image/svg+xml',
-        purpose: 'any'
-      },
-      {
         src: '/web-app-manifest-192x192.png',
         sizes: '192x192',
         type: 'image/png',
@@ -45,22 +27,7 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: 'maskable'
       }
     ],
-    screenshots: [
-      {
-        src: '/screenshot-wide.png',
-        sizes: '1280x720',
-        type: 'image/png',
-        form_factor: 'wide',
-        label: 'SkillCircle Platform Overview'
-      },
-      {
-        src: '/screenshot-narrow.png',
-        sizes: '750x1334',
-        type: 'image/png',
-        form_factor: 'narrow',
-        label: 'SkillCircle Mobile Experience'
-      }
-    ],
+
     shortcuts: [
       {
         name: 'Find Skills',
@@ -69,9 +36,9 @@ export default function manifest(): MetadataRoute.Manifest {
         url: '/search',
         icons: [
           {
-            src: '/logo.svg',
-            sizes: '64x64',
-            type: 'image/svg+xml'
+            src: '/web-app-manifest-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
           }
         ]
       },
@@ -82,9 +49,9 @@ export default function manifest(): MetadataRoute.Manifest {
         url: '/profile',
         icons: [
           {
-            src: '/logo.svg',
-            sizes: '64x64',
-            type: 'image/svg+xml'
+            src: '/web-app-manifest-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
           }
         ]
       },
@@ -95,9 +62,9 @@ export default function manifest(): MetadataRoute.Manifest {
         url: '/swaps',
         icons: [
           {
-            src: '/logo.svg',
-            sizes: '64x64',
-            type: 'image/svg+xml'
+            src: '/web-app-manifest-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
           }
         ]
       }
