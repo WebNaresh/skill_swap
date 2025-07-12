@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { GoogleSignInButton } from "./components";
 
 export const metadata: Metadata = {
@@ -38,26 +39,15 @@ export default function SignInPage() {
         <div className="bg-white rounded-lg shadow-lg p-8">
           {/* Logo/Brand Section */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-sky-400 to-blue-600 rounded-full flex items-center justify-center">
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 32 32"
-                className="text-white"
-                fill="currentColor"
-              >
-                {/* Origami Exchange Icon */}
-                <path d="M16 4 L24 12 L20 12 L20 16 L12 16 L12 12 L8 12 Z" />
-                <path d="M16 28 L8 20 L12 20 L12 16 L20 16 L20 20 L24 20 Z" />
-                <line
-                  x1="12"
-                  y1="16"
-                  x2="20"
-                  y2="16"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-              </svg>
+            <div className="w-20 h-20 mx-auto mb-4">
+              <Image
+                src="/web-app-manifest-512x512.png"
+                alt="SkillCircle Logo"
+                width={80}
+                height={80}
+                className="w-full h-full rounded-lg"
+                priority
+              />
             </div>
             <h2 className="text-2xl font-semibold text-gray-900 mb-2">
               SkillCircle

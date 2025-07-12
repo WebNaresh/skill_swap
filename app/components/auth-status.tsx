@@ -7,6 +7,10 @@ import Image from "next/image";
 export function AuthStatus() {
   const { data: session, status } = useSession();
 
+  console.log(`🚀 ~ auth-status.tsx:10 ~ AuthStatus ~ status:`, status);
+
+  console.log(`🚀 ~ auth-status.tsx:10 ~ AuthStatus ~ data:`, session);
+
   if (status === "loading") {
     return <div className="text-gray-600">Loading...</div>;
   }
@@ -28,6 +32,15 @@ export function AuthStatus() {
           <span className="text-gray-700">
             Welcome, {session.user?.name || session.user?.email}!
           </span>
+          {!session.user?.isSetupCompleted && (
+            <Link
+              href="/profile"
+              className="text-xs bg-sky-100 text-sky-700 px-2 py-1 rounded-full hover:bg-sky-200 transition-colors cursor-pointer"
+              title="Click to complete your profile setup"
+            >
+              Setup Required
+            </Link>
+          )}
         </div>
         <button
           onClick={() => signOut()}

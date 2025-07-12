@@ -1,27 +1,25 @@
 /**
- * Skills Search and Discovery Page for SkillCircle Platform
- * Allows authenticated users to browse and search for available skills
+ * Skill Exchange Requests Page for SkillCircle Platform
+ * Displays incoming and outgoing skill exchange requests for authenticated users
  */
 
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { SkillsSearchClient } from "./components/skills-search-client";
+import { SkillExchangeRequestsClient } from "./components/skill-exchange-requests-client";
 
 export const metadata: Metadata = {
-  title: "Discover Skills - SkillCircle",
-  description:
-    "Browse and search for skills offered by the SkillCircle community. Find the perfect skill exchange partner.",
+  title: "My Skill Exchange Requests - SkillCircle",
+  description: "Manage your incoming and outgoing skill exchange requests on SkillCircle.",
   openGraph: {
-    title: "Discover Skills - SkillCircle",
-    description:
-      "Browse and search for skills offered by the SkillCircle community. Find the perfect skill exchange partner.",
+    title: "My Skill Exchange Requests - SkillCircle",
+    description: "Manage your incoming and outgoing skill exchange requests on SkillCircle.",
     type: "website",
   },
 };
 
-export default async function SkillsSearchPage() {
+export default async function SkillExchangeRequestsPage() {
   const session = await getServerSession(authOptions);
 
   // Redirect if not authenticated
@@ -40,18 +38,18 @@ export default async function SkillsSearchPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Discover Skills
+            My Skill Exchange Requests
           </h1>
           <p className="text-xl text-gray-600 mb-2">
-            Browse and search for skills offered by our community
+            Manage your incoming and outgoing skill exchange requests
           </p>
           <p className="text-gray-500">
-            Find the perfect skill exchange partner and start learning today
+            Connect with community members and track your learning journey
           </p>
         </div>
 
-        {/* Skills Search Client Component */}
-        <SkillsSearchClient />
+        {/* Skill Exchange Requests Client Component */}
+        <SkillExchangeRequestsClient />
       </div>
     </div>
   );
