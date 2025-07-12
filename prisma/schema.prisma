@@ -84,12 +84,14 @@ enum SessionDuration {
 }
 
 model User {
-  id           String  @id @default(auto()) @map("_id") @db.ObjectId
-  email        String  @unique
-  name         String
-  profileImage String
-  bio          String?
-  location     Json?
+  id                  String  @id @default(auto()) @map("_id") @db.ObjectId
+  email               String  @unique
+  name                String
+  profileImage        String
+  bio                 String?
+  location            Json? // Legacy field for backward compatibility
+  locationString      String? // Human-readable address (e.g., "San Francisco, CA, USA")
+  locationCoordinates Json? // Coordinates object {lat: number, lng: number}
 
   isActive         Boolean @default(true)
   isVerified       Boolean @default(false)
@@ -173,11 +175,7 @@ model SkillOffered {
   yearsOfExperience Int?
 
   preferredFormat LearningPreference[]
-  maxStudents     Int?
-
-  availability AvailabilityType[]
-
-  lookingFor String
+  availability    AvailabilityType[]
 
   isActive Boolean @default(true)
   isPublic Boolean @default(true)
@@ -206,8 +204,6 @@ model SkillWanted {
   desiredLevel   ExperienceLevel
   currentLevel   ExperienceLevel?
   learningFormat LearningPreference[]
-
-  offeringSkills String
 
   timeCommitment String?
   targetDate     DateTime?
