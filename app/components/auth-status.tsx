@@ -28,6 +28,11 @@ export function AuthStatus() {
           <span className="text-gray-700">
             Welcome, {session.user?.name || session.user?.email}!
           </span>
+          {!session.user?.isSetupCompleted && (
+            <span className="text-xs bg-sky-100 text-sky-700 px-2 py-1 rounded-full">
+              Setup Required
+            </span>
+          )}
         </div>
         <button
           onClick={() => signOut()}

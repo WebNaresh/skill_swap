@@ -1,15 +1,9 @@
-/**
- * NextAuth.js Configuration for SkillCircle Platform
- * Handles Google OAuth authentication with database integration
- */
 
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./prisma";
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
       clientId: process.env.AUTH_GOOGLE_ID!,
@@ -38,20 +32,27 @@ export const authOptions: NextAuthOptions = {
               data: {
                 email: profile.email,
                 name: profile.name || "",
-                profileImage: profile.picture || "",
+                profileImage: (profile as any).picture || "",
                 isSetupCompleted: false,
-                isVerified: true, // Google OAuth users are considered verified
+                isVerified: true,
+                isActive: true,
               },
             });
           } else {
-            // Update existing user with latest Google data
-            await prisma.user.update({
-              where: { email: profile.email },
-              data: {
-                name: profile.name || existingUser.name,
-                profileImage: profile.picture || existingUser.profileImage,
-              },
-            });
+            // Update existing user with latest Google data if needed
+            const profilePicture = (profile as any).picture || "";
+            if (
+              existingUser.name !== profile.name ||
+              existingUser.profileImage !== profilePicture
+            ) {
+              await prisma.user.update({
+                where: { email: profile.email },
+                data: {
+                  name: profile.name || existingUser.name,
+                  profileImage: profilePicture || existingUser.profileImage,
+                },
+              });
+            }
           }
         }
         return true;
@@ -60,26 +61,82 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
     },
-    async session({ session, user }) {
-      if (session.user && user) {
-        // Fetch user from database to get complete profile
-        const dbUser = await prisma.user.findUnique({
-          where: { email: session.user.email! },
-          select: {
-            id: true,
-            email: true,
-            name: true,
-            profileImage: true,
-            isSetupCompleted: true,
-            isActive: true,
-          },
-        });
+    async jwt({ token, account, profile }) {
+      // Initial sign in - store user data in token
+      if (account && profile) {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: profile.email! },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              profileImage: true,
+              isSetupCompleted: true,
+              isActive: true,
+            },
+          });
 
-        if (dbUser) {
-          session.user.id = dbUser.id;
-          session.user.isSetupCompleted = dbUser.isSetupCompleted;
-          session.user.isActive = dbUser.isActive;
+          if (dbUser) {
+            token.id = dbUser.id;
+            token.isSetupCompleted = dbUser.isSetupCompleted;
+            token.isActive = dbUser.isActive;
+          }
+        } catch (error) {
+          console.error("Error fetching user data in JWT callback:", error);
         }
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      try {
+        if (token?.email) {
+          // Fetch fresh user data from database for each session
+          const dbUser = await prisma.user.findUnique({
+            where: { email: token.email },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              profileImage: true,
+              isSetupCompleted: true,
+              isActive: true,
+            },
+          });
+
+          if (dbUser) {
+            // Populate session with complete database user data
+            session.user = {
+              id: dbUser.id,
+              email: dbUser.email,
+              name: dbUser.name || "",
+              image: dbUser.profileImage,
+              isSetupCompleted: dbUser.isSetupCompleted,
+              isActive: dbUser.isActive,
+            };
+          } else {
+            // Fallback: user not found in database
+            session.user = {
+              id: token.id as string || "",
+              email: token.email || "",
+              name: token.name || "",
+              image: token.picture || undefined,
+              isSetupCompleted: false,
+              isActive: false,
+            };
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data in session callback:", error);
+        // Fallback to token data if database query fails
+        session.user = {
+          id: token.id as string || "",
+          email: token.email || "",
+          name: token.name || "",
+          image: token.picture || undefined,
+          isSetupCompleted: token.isSetupCompleted as boolean || false,
+          isActive: token.isActive as boolean || true,
+        };
       }
       return session;
     },
@@ -95,7 +152,7 @@ export const authOptions: NextAuthOptions = {
     error: "/sign-in",
   },
   session: {
-    strategy: "database",
+    strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
