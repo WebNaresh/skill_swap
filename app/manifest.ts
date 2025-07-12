@@ -30,10 +30,10 @@ export default function manifest(): MetadataRoute.Manifest {
 
     shortcuts: [
       {
-        name: 'Find Skills',
-        short_name: 'Search',
-        description: 'Search for skills to learn',
-        url: '/search',
+        name: 'Terms & Conditions',
+        short_name: 'Terms',
+        description: 'View terms and conditions',
+        url: '/terms',
         icons: [
           {
             src: '/web-app-manifest-192x192.png',
@@ -43,23 +43,10 @@ export default function manifest(): MetadataRoute.Manifest {
         ]
       },
       {
-        name: 'My Profile',
-        short_name: 'Profile',
-        description: 'View and edit your profile',
-        url: '/profile',
-        icons: [
-          {
-            src: '/web-app-manifest-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          }
-        ]
-      },
-      {
-        name: 'My Swaps',
-        short_name: 'Swaps',
-        description: 'Manage your skill exchanges',
-        url: '/swaps',
+        name: 'Privacy Policy',
+        short_name: 'Privacy',
+        description: 'View privacy policy',
+        url: '/privacy',
         icons: [
           {
             src: '/web-app-manifest-192x192.png',
