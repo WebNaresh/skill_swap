@@ -1,88 +1,38 @@
+/**
+ * Skills Search and Discovery Page for SkillCircle Platform
+ * Allows authenticated users to browse and search for available skills
+ */
+
 import type { Metadata } from "next";
-import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { SkillsSearchClient } from "./components/skills-search-client";
 
 export const metadata: Metadata = {
-  title: "Search Skills - SkillCircle",
+  title: "Discover Skills - SkillCircle",
   description:
-    "Discover and search for skills to learn or teach on SkillCircle. Find people in your area or online who want to exchange knowledge through our skill barter platform.",
+    "Browse and search for skills offered by the SkillCircle community. Find the perfect skill exchange partner.",
   openGraph: {
-    title: "Search Skills - SkillCircle",
+    title: "Discover Skills - SkillCircle",
     description:
-      "Discover and search for skills to learn or teach on SkillCircle.",
+      "Browse and search for skills offered by the SkillCircle community. Find the perfect skill exchange partner.",
     type: "website",
   },
 };
 
-export default function SearchPage() {
-  // Sample skills data - in a real app, this would come from a database
-  const sampleSkills = [
-    {
-      id: 1,
-      title: "Web Development",
-      category: "Technology",
-      description:
-        "Learn modern web development with React, Next.js, and TypeScript",
-      teacher: "John Doe",
-      location: "Online",
-      exchange: "Looking to learn: Graphic Design",
-    },
-    {
-      id: 2,
-      title: "Guitar Lessons",
-      category: "Music",
-      description:
-        "Beginner to intermediate guitar lessons, acoustic and electric",
-      teacher: "Sarah Smith",
-      location: "New York, NY",
-      exchange: "Looking to learn: Photography",
-    },
-    {
-      id: 3,
-      title: "Spanish Language",
-      category: "Languages",
-      description: "Native Spanish speaker offering conversational practice",
-      teacher: "Carlos Rodriguez",
-      location: "Online",
-      exchange: "Looking to learn: English Business Writing",
-    },
-    {
-      id: 4,
-      title: "Digital Marketing",
-      category: "Business",
-      description: "SEO, social media marketing, and content strategy",
-      teacher: "Emily Chen",
-      location: "San Francisco, CA",
-      exchange: "Looking to learn: Data Analysis",
-    },
-    {
-      id: 5,
-      title: "Cooking - Italian Cuisine",
-      category: "Culinary",
-      description: "Traditional Italian recipes and cooking techniques",
-      teacher: "Marco Rossi",
-      location: "Chicago, IL",
-      exchange: "Looking to learn: Baking & Pastry",
-    },
-    {
-      id: 6,
-      title: "Yoga & Meditation",
-      category: "Health & Wellness",
-      description: "Hatha yoga and mindfulness meditation for beginners",
-      teacher: "Lisa Johnson",
-      location: "Online",
-      exchange: "Looking to learn: Nutrition Planning",
-    },
-  ];
+export default async function SkillsSearchPage() {
+  const session = await getServerSession(authOptions);
 
-  const categories = [
-    "All",
-    "Technology",
-    "Music",
-    "Languages",
-    "Business",
-    "Culinary",
-    "Health & Wellness",
-  ];
+  // Redirect if not authenticated
+  if (!session?.user) {
+    redirect("/sign-in");
+  }
+
+  // Redirect if profile is not completed
+  if (!session.user.isSetupCompleted) {
+    redirect("/profile");
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-50">
@@ -90,13 +40,22 @@ export default function SearchPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Search Skills
+            Discover Skills
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Discover amazing skills to learn and find people who want to teach
-            what you know
+          <p className="text-xl text-gray-600 mb-2">
+            Browse and search for skills offered by our community
+          </p>
+          <p className="text-gray-500">
+            Find the perfect skill exchange partner and start learning today
           </p>
         </div>
+
+        {/* Skills Search Client Component */}
+        <SkillsSearchClient />
+      </div>
+    </div>
+  );
+}
 
         {/* Search and Filters */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
