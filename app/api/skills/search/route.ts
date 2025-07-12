@@ -57,6 +57,17 @@ export async function GET(request: NextRequest) {
         isPrivate: false,
         showSkillsOffered: true,
       },
+      // Exclude skills the user is already learning (has active exchange requests for)
+      NOT: {
+        exchanges: {
+          some: {
+            learnerId: session.user.id,
+            status: {
+              in: ["PENDING", "ACCEPTED", "IN_PROGRESS"],
+            },
+          },
+        },
+      },
     };
 
     // Add text search filter
