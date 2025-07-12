@@ -1,38 +1,9 @@
 import Link from "next/link";
-import { AuthStatus } from "./components/auth-status";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-50">
-      {/* Header */}
-      <header className="container mx-auto px-4 py-6">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-sky-400 to-blue-600 rounded-full flex items-center justify-center">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                className="text-white"
-                fill="currentColor"
-              >
-                <path d="M12 3 L18 9 L15 9 L15 12 L9 12 L9 9 L6 9 Z" />
-                <path d="M12 21 L6 15 L9 15 L9 12 L15 12 L15 15 L18 15 Z" />
-                <line
-                  x1="9"
-                  y1="12"
-                  x2="15"
-                  y2="12"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900">SkillCircle</h1>
-          </div>
-          <AuthStatus />
-        </div>
-      </header>
+    <div className="bg-gradient-to-br from-sky-50 to-blue-50">
+      {/* Removed min-h-screen since layout handles it */}
 
       {/* Hero Section */}
       <main className="container mx-auto px-4 py-16 text-center">
@@ -121,51 +92,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 py-8">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-sky-400 to-blue-600 rounded-full flex items-center justify-center">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  className="text-white"
-                  fill="currentColor"
-                >
-                  <path d="M12 3 L18 9 L15 9 L15 12 L9 12 L9 9 L6 9 Z" />
-                  <path d="M12 21 L6 15 L9 15 L9 12 L15 12 L15 15 L18 15 Z" />
-                </svg>
-              </div>
-              <span className="text-gray-600">
-                © 2024 SkillCircle. All rights reserved.
-              </span>
-            </div>
-            <div className="flex gap-6">
-              <Link
-                href="/terms"
-                className="text-gray-600 hover:text-sky-600 transition-colors"
-              >
-                Terms
-              </Link>
-              <Link
-                href="/privacy"
-                className="text-gray-600 hover:text-sky-600 transition-colors"
-              >
-                Privacy
-              </Link>
-              <Link
-                href="/refund"
-                className="text-gray-600 hover:text-sky-600 transition-colors"
-              >
-                Refund Policy
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
