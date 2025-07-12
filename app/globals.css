@@ -120,3 +120,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom background pattern for hero section */
+.bg-grid-pattern {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(14, 165, 233, 0.15) 1px,
+    transparent 0
+  );
+  background-size: 20px 20px;
+}

@@ -1,97 +1,399 @@
 import Link from "next/link";
+import {
+  Users,
+  BookOpen,
+  TrendingUp,
+  Star,
+  ArrowRight,
+  CheckCircle,
+  Zap,
+  Heart,
+  Globe,
+  Award,
+  MessageCircle,
+  Target,
+} from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="bg-gradient-to-br from-sky-50 to-blue-50">
-      {/* Removed min-h-screen since layout handles it */}
-
+    <div className="bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 min-h-screen">
       {/* Hero Section */}
-      <main className="container mx-auto px-4 py-16 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-5xl font-bold text-gray-900 mb-6">
-            Where Skills Come <span className="text-sky-600">Full Circle</span>
-          </h2>
-          <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-            Connect with people who want to teach skills they know in exchange
-            for learning skills they need. Our modern barter platform makes
-            skill exchange simple, safe, and rewarding.
-          </p>
+      <main className="relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Link
-              href="/sign-in"
-              className="px-8 py-4 bg-sky-600 text-white rounded-lg font-semibold hover:bg-sky-700 transition-colors"
-            >
-              Get Started
-            </Link>
-            <Link
-              href="/terms"
-              className="px-8 py-4 border-2 border-sky-600 text-sky-600 rounded-lg font-semibold hover:bg-sky-50 transition-colors"
-            >
-              Learn More
-            </Link>
-          </div>
-
-          {/* Features */}
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
-            <div className="bg-white rounded-lg p-6 shadow-lg">
-              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="w-6 h-6 text-sky-600"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Connect
-              </h3>
-              <p className="text-gray-600">
-                Find people with complementary skills in your area or online
-              </p>
+        <div className="container mx-auto px-4 py-20 text-center relative">
+          <div className="max-w-5xl mx-auto">
+            {/* Hero Badge */}
+            <div className="inline-flex items-center gap-2 bg-sky-100 text-sky-700 px-4 py-2 rounded-full text-sm font-medium mb-8">
+              <Zap className="h-4 w-4" />
+              Join the skill exchange revolution
             </div>
 
-            <div className="bg-white rounded-lg p-6 shadow-lg">
-              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="w-6 h-6 text-sky-600"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 11-1.414 1.414L2.586 7l3.707-3.707a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Exchange
-              </h3>
-              <p className="text-gray-600">
-                Trade your expertise for new skills through our barter system
-              </p>
+            {/* Main Headline */}
+            <h1 className="text-6xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+              Where Skills Come{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-blue-600">
+                Full Circle
+              </span>
+            </h1>
+
+            {/* Enhanced Subtitle */}
+            <p className="text-xl md:text-2xl text-gray-600 mb-4 leading-relaxed max-w-3xl mx-auto">
+              Trade your expertise for new knowledge. No money required.
+            </p>
+            <p className="text-lg text-gray-500 mb-12 max-w-2xl mx-auto">
+              Connect with passionate learners and teachers in your community.
+              Exchange skills, build relationships, and grow together.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+              <Link
+                href="/sign-in"
+                className="group px-8 py-4 bg-sky-600 text-white rounded-xl font-semibold hover:bg-sky-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center gap-2"
+              >
+                Start Exchanging Skills
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                href="/search"
+                className="px-8 py-4 border-2 border-sky-600 text-sky-600 rounded-xl font-semibold hover:bg-sky-50 transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <BookOpen className="h-5 w-5" />
+                Browse Skills
+              </Link>
             </div>
 
-            <div className="bg-white rounded-lg p-6 shadow-lg">
-              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="w-6 h-6 text-sky-600"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
+            {/* Trust Indicators */}
+            <div className="flex flex-wrap justify-center items-center gap-8 text-gray-500 text-sm">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                100% Free Platform
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Grow</h3>
-              <p className="text-gray-600">
-                Build your skills, expand your network, and track your progress
-              </p>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                Verified Community
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                Safe & Secure
+              </div>
             </div>
           </div>
         </div>
       </main>
+
+      {/* Statistics Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Join Our Growing Community
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Thousands of learners and teachers are already exchanging skills
+              on SkillCircle
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="text-4xl md:text-5xl font-bold text-sky-600 mb-2">
+                1,200+
+              </div>
+              <div className="text-gray-600 font-medium">Active Members</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl md:text-5xl font-bold text-sky-600 mb-2">
+                500+
+              </div>
+              <div className="text-gray-600 font-medium">Skills Available</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl md:text-5xl font-bold text-sky-600 mb-2">
+                850+
+              </div>
+              <div className="text-gray-600 font-medium">
+                Successful Exchanges
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl md:text-5xl font-bold text-sky-600 mb-2">
+                4.9
+              </div>
+              <div className="text-gray-600 font-medium">Average Rating</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Enhanced Features Section */}
+      <section className="py-20 bg-gradient-to-br from-gray-50 to-sky-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              How SkillCircle Works
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Our platform makes skill exchange simple, safe, and rewarding for
+              everyone
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-gradient-to-br from-sky-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Users className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
+                Connect
+              </h3>
+              <p className="text-gray-600 text-center leading-relaxed">
+                Find people with complementary skills in your area or online.
+                Browse our diverse community of passionate learners and
+                teachers.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Target className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
+                Exchange
+              </h3>
+              <p className="text-gray-600 text-center leading-relaxed">
+                Trade your expertise for new skills through our secure barter
+                system. No money required - just knowledge and enthusiasm.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <TrendingUp className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
+                Grow
+              </h3>
+              <p className="text-gray-600 text-center leading-relaxed">
+                Build your skills, expand your network, and track your progress.
+                Join a community that values continuous learning and growth.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+                  Why Choose SkillCircle?
+                </h2>
+                <p className="text-lg text-gray-600 mb-8">
+                  Experience the future of learning through our innovative skill
+                  exchange platform.
+                </p>
+
+                <div className="space-y-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 bg-sky-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <Heart className="w-4 h-4 text-sky-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        Community-Driven Learning
+                      </h3>
+                      <p className="text-gray-600">
+                        Learn from real people with real experience. Build
+                        meaningful connections while acquiring new skills.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 bg-sky-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <Globe className="w-4 h-4 text-sky-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        Global Reach, Local Impact
+                      </h3>
+                      <p className="text-gray-600">
+                        Connect with learners worldwide or find teachers in your
+                        local area. Choose online or in-person exchanges.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 bg-sky-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <Award className="w-4 h-4 text-sky-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        Verified & Trusted
+                      </h3>
+                      <p className="text-gray-600">
+                        Our community is built on trust. Rate and review your
+                        exchanges to help others find the best teachers.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="bg-gradient-to-br from-sky-400 to-blue-600 rounded-3xl p-8 text-white">
+                  <div className="text-center">
+                    <Star className="w-16 h-16 mx-auto mb-6 text-yellow-300" />
+                    <h3 className="text-2xl font-bold mb-4">Ready to Start?</h3>
+                    <p className="text-sky-100 mb-6">
+                      Join thousands of learners and teachers who are already
+                      growing together.
+                    </p>
+                    <Link
+                      href="/sign-in"
+                      className="inline-flex items-center gap-2 bg-white text-sky-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
+                    >
+                      Join SkillCircle Today
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 bg-gradient-to-br from-sky-50 to-blue-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              What Our Community Says
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Real stories from real people who have transformed their skills
+              through SkillCircle
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white rounded-2xl p-8 shadow-lg">
+              <div className="flex items-center gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className="w-5 h-5 text-yellow-400 fill-current"
+                  />
+                ))}
+              </div>
+              <p className="text-gray-600 mb-6 italic">
+                &quot;I learned web development by teaching someone guitar. The
+                exchange was amazing and I made a great friend!&quot;
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-sky-200 rounded-full flex items-center justify-center">
+                  <span className="text-sky-700 font-semibold">SM</span>
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">Sarah M.</div>
+                  <div className="text-sm text-gray-500">
+                    Musician → Web Developer
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-8 shadow-lg">
+              <div className="flex items-center gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className="w-5 h-5 text-yellow-400 fill-current"
+                  />
+                ))}
+              </div>
+              <p className="text-gray-600 mb-6 italic">
+                &quot;SkillCircle helped me find a photography mentor in
+                exchange for teaching Spanish. Both skills improved
+                tremendously!&quot;
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-sky-200 rounded-full flex items-center justify-center">
+                  <span className="text-sky-700 font-semibold">JR</span>
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">James R.</div>
+                  <div className="text-sm text-gray-500">
+                    Language Teacher → Photographer
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-8 shadow-lg">
+              <div className="flex items-center gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className="w-5 h-5 text-yellow-400 fill-current"
+                  />
+                ))}
+              </div>
+              <p className="text-gray-600 mb-6 italic">
+                &quot;The community is incredibly supportive. I&apos;ve learned
+                cooking and taught coding - both experiences were
+                fantastic!&quot;
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-sky-200 rounded-full flex items-center justify-center">
+                  <span className="text-sky-700 font-semibold">AL</span>
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">Alex L.</div>
+                  <div className="text-sm text-gray-500">Developer → Chef</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-sky-600 to-blue-700 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              Your Next Skill is Just an Exchange Away
+            </h2>
+            <p className="text-xl text-sky-100 mb-8">
+              Join SkillCircle today and discover the joy of learning through
+              teaching.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/sign-in"
+                className="px-8 py-4 bg-white text-sky-600 rounded-xl font-semibold hover:bg-gray-50 transition-colors shadow-lg"
+              >
+                Get Started for Free
+              </Link>
+              <Link
+                href="/search"
+                className="px-8 py-4 border-2 border-white text-white rounded-xl font-semibold hover:bg-white hover:text-sky-600 transition-colors"
+              >
+                Explore Skills
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
