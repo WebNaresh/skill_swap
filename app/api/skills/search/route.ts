@@ -11,12 +11,12 @@ import { z } from "zod";
 
 // Search parameters validation schema
 const searchParamsSchema = z.object({
-  query: z.string().optional(),
-  category: z.string().optional(),
-  experienceLevel: z.string().optional(),
-  location: z.string().optional(),
-  page: z.string().optional().transform((val) => val ? parseInt(val, 10) : 1),
-  limit: z.string().optional().transform((val) => val ? parseInt(val, 10) : 12),
+  query: z.string().nullable().optional(),
+  category: z.string().nullable().optional(),
+  experienceLevel: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  page: z.string().nullable().optional().transform((val) => val ? parseInt(val, 10) : 1),
+  limit: z.string().nullable().optional().transform((val) => val ? parseInt(val, 10) : 12),
 });
 
 export async function GET(request: NextRequest) {
@@ -60,29 +60,29 @@ export async function GET(request: NextRequest) {
     };
 
     // Add text search filter
-    if (query) {
+    if (query && query.trim()) {
       where.OR = [
-        { title: { contains: query, mode: "insensitive" } },
-        { description: { contains: query, mode: "insensitive" } },
+        { title: { contains: query.trim(), mode: "insensitive" } },
+        { description: { contains: query.trim(), mode: "insensitive" } },
       ];
     }
 
     // Add category filter
-    if (category && category !== "ALL") {
+    if (category && category !== "ALL" && category !== null) {
       where.category = category;
     }
 
     // Add experience level filter
-    if (experienceLevel && experienceLevel !== "ALL") {
+    if (experienceLevel && experienceLevel !== "ALL" && experienceLevel !== null) {
       where.experienceLevel = experienceLevel;
     }
 
     // Add location filter (if provided and user allows location sharing)
-    if (location) {
+    if (location && location.trim()) {
       where.user.showLocation = true;
       where.user.location = {
         path: ["city"],
-        string_contains: location,
+        string_contains: location.trim(),
       };
     }
 
