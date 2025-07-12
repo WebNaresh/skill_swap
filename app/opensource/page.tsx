@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import {
   BookOpen,
   Users,
@@ -9,7 +10,6 @@ import {
   MessageSquare,
   Shield,
   CheckCircle,
-  ArrowRight,
   Github,
   ExternalLink,
   Star,
@@ -250,10 +250,17 @@ export default function OpenSourcePage() {
                 </div>
                 <div className="flex flex-col md:flex-row items-center gap-6">
                   <div className="relative">
-                    <div className="w-20 h-20 bg-gradient-to-br from-sky-400 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                      WN
+                    <div className="w-20 h-20 rounded-full overflow-hidden ring-4 ring-sky-200 shadow-lg">
+                      <Image
+                        src="https://avatars.githubusercontent.com/u/91016022?v=4"
+                        alt="WebNaresh GitHub Avatar"
+                        width={80}
+                        height={80}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        priority
+                      />
                     </div>
-                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center ring-2 ring-white shadow-md">
                       <CheckCircle className="w-5 h-5 text-white" />
                     </div>
                   </div>
