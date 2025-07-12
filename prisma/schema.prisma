@@ -91,8 +91,9 @@ model User {
   bio          String?
   location     Json?
 
-  isActive   Boolean @default(true)
-  isVerified Boolean @default(false)
+  isActive         Boolean @default(true)
+  isVerified       Boolean @default(false)
+  isSetupCompleted Boolean @default(false)
 
   isPrivate          Boolean @default(false)
   showLocation       Boolean @default(true)

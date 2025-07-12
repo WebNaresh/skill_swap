@@ -1,5 +1,11 @@
-import NextAuth from "@/auth"
+/**
+ * NextAuth.js API Route for SkillCircle Platform
+ * Handles all authentication requests
+ */
 
-const handler = NextAuth
+import NextAuth from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-export { handler as GET, handler as POST }
+const handler = NextAuth(authOptions);
+
+export { handler as GET, handler as POST };
