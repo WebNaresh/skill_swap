@@ -110,7 +110,7 @@ export default function TermsPage() {
               <li>Creating fake profiles or misrepresenting skills</li>
               <li>Harassment, discrimination, or inappropriate behavior</li>
               <li>
-                Attempting to monetize exchanges outside the platform&quot;s
+                Attempting to monetize exchanges outside the platform&apos;s
                 barter system
               </li>
               <li>Sharing inappropriate content or spam</li>
