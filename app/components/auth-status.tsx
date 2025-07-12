@@ -33,9 +33,13 @@ export function AuthStatus() {
             Welcome, {session.user?.name || session.user?.email}!
           </span>
           {!session.user?.isSetupCompleted && (
-            <span className="text-xs bg-sky-100 text-sky-700 px-2 py-1 rounded-full">
+            <Link
+              href="/profile"
+              className="text-xs bg-sky-100 text-sky-700 px-2 py-1 rounded-full hover:bg-sky-200 transition-colors cursor-pointer"
+              title="Click to complete your profile setup"
+            >
               Setup Required
-            </span>
+            </Link>
           )}
         </div>
         <button

@@ -182,13 +182,16 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
           "🚀 Profile setup success - Session updated, redirecting..."
         );
 
-        // Navigate to home page after session is updated
-        // Add a timestamp to bypass middleware caching issues
-        window.location.href = "/?setup_completed=" + Date.now();
+        // Force a complete page reload to ensure all caches are cleared
+        // This will trigger a fresh authentication flow
+        console.log(
+          "🚀 Profile setup success - Forcing complete page reload..."
+        );
+        window.location.replace("/");
       } catch (error) {
         console.error("Error updating session:", error);
         // Fallback: force page reload
-        window.location.href = "/";
+        window.location.replace("/");
       }
     },
     onError: (error) => {

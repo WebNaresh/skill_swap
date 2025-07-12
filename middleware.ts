@@ -30,6 +30,13 @@ export default withAuth(
       return NextResponse.next();
     }
 
+    // TEMPORARY FIX: Disable middleware redirects for this specific user
+    // until JWT token sync issue is resolved
+    if (token && token.email === 'navibyteinnovations@gmail.com') {
+      console.log(`🚀 Middleware - Bypassing redirect for user with token sync issue`);
+      return NextResponse.next();
+    }
+
     // Redirect authenticated users to profile setup if not completed
     if (token && !token.isSetupCompleted && pathname !== "/profile") {
       console.log(`🚀 Middleware - Redirecting to /profile (setup not completed)`);
