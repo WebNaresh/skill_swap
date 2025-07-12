@@ -23,24 +23,26 @@ export async function POST(request: NextRequest) {
 
     // Parse and validate request body
     const body = await request.json();
+    console.log("🚀 Profile setup API - Session user:", session.user.email);
+
     const validatedData = profileSetupSchema.parse(body);
+    console.log("🚀 Profile setup API - Validation passed");
 
     // Start a transaction to update all related data
     const result = await prisma.$transaction(async (tx) => {
+      console.log("🚀 Profile setup API - Starting transaction");
       // Update user profile
       const updatedUser = await tx.user.update({
         where: { email: session.user.email },
         data: {
           name: validatedData.name,
           bio: validatedData.bio || null,
-          // Store location data in new format
-          locationString: validatedData.location?.address || null,
-          locationCoordinates: validatedData.location?.position || null,
-          // Keep legacy location field for backward compatibility
+          // Store location data in legacy format for now
           location: validatedData.location?.address
             ? {
               city: validatedData.location.address,
               isPublic: validatedData.privacy.showLocation,
+              coordinates: validatedData.location.position || null,
             }
             : null,
           isSetupCompleted: true,
@@ -77,6 +79,11 @@ export async function POST(request: NextRequest) {
               category: skill.category,
               experienceLevel: skill.experienceLevel,
               yearsOfExperience: skill.yearsOfExperience || null,
+              // Add required fields with defaults
+              preferredFormat: [],
+              availability: [],
+              isActive: true,
+              isPublic: true,
             },
           })
         )
@@ -105,6 +112,9 @@ export async function POST(request: NextRequest) {
         skillsWanted,
       };
     });
+
+    console.log("🚀 Profile setup API - Transaction completed successfully");
+    console.log("🚀 Profile setup API - Updated user:", result.user.email, "isSetupCompleted:", result.user.isSetupCompleted);
 
     return NextResponse.json({
       success: true,

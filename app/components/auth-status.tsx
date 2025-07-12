@@ -7,6 +7,10 @@ import Image from "next/image";
 export function AuthStatus() {
   const { data: session, status } = useSession();
 
+  console.log(`🚀 ~ auth-status.tsx:10 ~ AuthStatus ~ status:`, status);
+
+  console.log(`🚀 ~ auth-status.tsx:10 ~ AuthStatus ~ data:`, session);
+
   if (status === "loading") {
     return <div className="text-gray-600">Loading...</div>;
   }

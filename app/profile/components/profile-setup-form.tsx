@@ -6,14 +6,14 @@
  */
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useForm, useFieldArray, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { signOut, signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -29,11 +29,6 @@ import InputField from "@/components/AppInputFields/InputField";
 import {
   profileSetupSchema,
   type ProfileSetupFormData,
-  SkillCategoryEnum,
-  ExperienceLevelEnum,
-  DayOfWeekEnum,
-  TimeSlotEnum,
-  SessionDurationEnum,
 } from "@/lib/validations/profile-setup";
 import {
   Plus,
@@ -46,10 +41,9 @@ import {
   MapPin,
   User,
   FileText,
-  Tag,
   Award,
-  Calendar,
   Globe,
+  Tag,
 } from "lucide-react";
 
 interface User {
@@ -130,10 +124,9 @@ const TIMEZONE_OPTIONS = [
 ];
 
 export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
+  const { update } = useSession();
 
   const form = useForm({
     resolver: zodResolver(profileSetupSchema),
@@ -163,6 +156,47 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
   });
   console.log("errors", form.formState.errors);
 
+  // TanStack Query mutation for profile setup
+  const mutation = useMutation({
+    mutationFn: async (formData: ProfileSetupFormData) => {
+      const response = await fetch("/api/profile/setup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update profile");
+      }
+
+      return response.json();
+    },
+    onSuccess: async () => {
+      try {
+        // Update the session to reflect the new isSetupCompleted status
+        console.log("🚀 Profile setup success - Updating session...");
+        await update();
+        console.log(
+          "🚀 Profile setup success - Session updated, redirecting..."
+        );
+
+        // Navigate to home page after session is updated
+        // Add a timestamp to bypass middleware caching issues
+        window.location.href = "/?setup_completed=" + Date.now();
+      } catch (error) {
+        console.error("Error updating session:", error);
+        // Fallback: force page reload
+        window.location.href = "/";
+      }
+    },
+    onError: (error) => {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile. Please try again.");
+    },
+  });
+
   const {
     fields: skillsOfferedFields,
     append: appendSkillOffered,
@@ -181,36 +215,20 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
     name: "skillsWanted" as const,
   });
 
-  const onSubmit = async (data: any) => {
-    setIsLoading(true);
-    try {
-      // Type assertion to ensure data matches our expected structure
-      const formData = data as ProfileSetupFormData;
+  const onSubmit = (data: any) => {
+    // Type assertion to ensure data matches our expected structure
+    const formData = data as ProfileSetupFormData;
 
-      const response = await fetch("/api/profile/setup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        router.push("/");
-        router.refresh();
-      } else {
-        throw new Error("Failed to update profile");
-      }
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      alert("Failed to update profile. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    // Use the mutation to submit the form data
+    mutation.mutate(formData);
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
     if (currentStep < totalSteps) {
+      // Trigger validation when moving to final step
+      if (currentStep === totalSteps - 1) {
+        await form.trigger();
+      }
       setCurrentStep(currentStep + 1);
     }
   };
@@ -342,8 +360,26 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                         >
                           <Checkbox
                             id={day.value}
-                            {...form.register("availability.daysOfWeek")}
-                            value={day.value}
+                            checked={form
+                              .watch("availability.daysOfWeek")
+                              ?.includes(day.value as any)}
+                            onCheckedChange={(checked) => {
+                              const currentDays =
+                                form.getValues("availability.daysOfWeek") || [];
+                              if (checked) {
+                                form.setValue(
+                                  "availability.daysOfWeek",
+                                  [...currentDays, day.value as any],
+                                  { shouldValidate: true }
+                                );
+                              } else {
+                                form.setValue(
+                                  "availability.daysOfWeek",
+                                  currentDays.filter((d) => d !== day.value),
+                                  { shouldValidate: true }
+                                );
+                              }
+                            }}
                           />
                           <Label htmlFor={day.value} className="text-sm">
                             {day.label}
@@ -374,8 +410,26 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                         >
                           <Checkbox
                             id={slot.value}
-                            {...form.register("availability.timeSlots")}
-                            value={slot.value}
+                            checked={form
+                              .watch("availability.timeSlots")
+                              ?.includes(slot.value as any)}
+                            onCheckedChange={(checked) => {
+                              const currentSlots =
+                                form.getValues("availability.timeSlots") || [];
+                              if (checked) {
+                                form.setValue(
+                                  "availability.timeSlots",
+                                  [...currentSlots, slot.value as any],
+                                  { shouldValidate: true }
+                                );
+                              } else {
+                                form.setValue(
+                                  "availability.timeSlots",
+                                  currentSlots.filter((s) => s !== slot.value),
+                                  { shouldValidate: true }
+                                );
+                              }
+                            }}
                           />
                           <Label htmlFor={slot.value} className="text-sm">
                             {slot.label}
@@ -601,28 +655,15 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                           Icon={BookOpen}
                           required
                         />
-                        <Select
-                          onValueChange={(value) =>
-                            form.setValue(
-                              `skillsOffered.${index}.category`,
-                              value as any
-                            )
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {SKILL_CATEGORIES.map((category) => (
-                              <SelectItem
-                                key={category.value}
-                                value={category.value}
-                              >
-                                {category.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <InputField
+                          label="Category"
+                          name={`skillsOffered.${index}.category`}
+                          type="select"
+                          placeholder="Select category"
+                          options={SKILL_CATEGORIES}
+                          Icon={Tag}
+                          required
+                        />
                       </div>
 
                       <InputField
@@ -655,15 +696,38 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                           </SelectContent>
                         </Select>
 
-                        <InputField
-                          label="Years of Experience"
-                          name={`skillsOffered.${index}.yearsOfExperience`}
-                          type="number"
-                          placeholder="Years of experience"
-                          Icon={Award}
-                          min={0}
-                          max={50}
-                        />
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor={`yearsOfExperience-${index}`}
+                            className="text-sm font-medium flex items-center gap-2"
+                          >
+                            <Award className="h-4 w-4" />
+                            Years of Experience
+                          </Label>
+                          <Input
+                            id={`yearsOfExperience-${index}`}
+                            type="number"
+                            placeholder="Years of experience (0-50)"
+                            min="0"
+                            max="50"
+                            {...form.register(
+                              `skillsOffered.${index}.yearsOfExperience`,
+                              {
+                                valueAsNumber: true,
+                              }
+                            )}
+                          />
+                          {form.formState.errors.skillsOffered?.[index]
+                            ?.yearsOfExperience && (
+                            <p className="text-red-500 text-sm">
+                              {String(
+                                form.formState.errors.skillsOffered[index]
+                                  ?.yearsOfExperience?.message ||
+                                  "Invalid years of experience"
+                              )}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -717,37 +781,32 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input
-                          placeholder="Skill title"
-                          {...form.register(`skillsWanted.${index}.title`)}
+                        <InputField
+                          label="Skill Title"
+                          name={`skillsWanted.${index}.title`}
+                          type="text"
+                          placeholder="Enter skill you want to learn"
+                          Icon={Target}
+                          required
                         />
-                        <Select
-                          onValueChange={(value) =>
-                            form.setValue(
-                              `skillsWanted.${index}.category`,
-                              value as any
-                            )
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {SKILL_CATEGORIES.map((category) => (
-                              <SelectItem
-                                key={category.value}
-                                value={category.value}
-                              >
-                                {category.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <InputField
+                          label="Category"
+                          name={`skillsWanted.${index}.category`}
+                          type="select"
+                          placeholder="Select category"
+                          options={SKILL_CATEGORIES}
+                          Icon={Tag}
+                          required
+                        />
                       </div>
 
-                      <Textarea
-                        placeholder="Describe what you want to learn..."
-                        {...form.register(`skillsWanted.${index}.description`)}
+                      <InputField
+                        label="Learning Description"
+                        name={`skillsWanted.${index}.description`}
+                        type="text-area"
+                        placeholder="Describe what you want to learn and your learning goals..."
+                        Icon={FileText}
+                        required
                       />
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -834,10 +893,10 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                     </Button>
                     <Button
                       type="submit"
-                      disabled={isLoading}
+                      disabled={mutation.isPending}
                       className="bg-sky-600 hover:bg-sky-700 text-white px-8 py-2"
                     >
-                      {isLoading ? "Setting up..." : "Complete Setup"}
+                      {mutation.isPending ? "Setting up..." : "Complete Setup"}
                     </Button>
                   </div>
                 </CardContent>

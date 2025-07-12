@@ -16,13 +16,29 @@ export default withAuth(
       return NextResponse.next();
     }
 
+    // Debug middleware token
+    if (token) {
+      console.log(`🚀 Middleware - User: ${token.email}, isSetupCompleted: ${token.isSetupCompleted}, pathname: ${pathname}`);
+    }
+
+    // Check if this is a fresh redirect from profile setup completion
+    const url = new URL(req.url);
+    const setupCompleted = url.searchParams.get('setup_completed');
+
+    if (setupCompleted) {
+      console.log(`🚀 Middleware - Profile setup just completed, allowing access to home`);
+      return NextResponse.next();
+    }
+
     // Redirect authenticated users to profile setup if not completed
     if (token && !token.isSetupCompleted && pathname !== "/profile") {
+      console.log(`🚀 Middleware - Redirecting to /profile (setup not completed)`);
       return NextResponse.redirect(new URL("/profile", req.url));
     }
 
     // Redirect users with completed setup away from profile page
     if (token && token.isSetupCompleted && pathname === "/profile") {
+      console.log(`🚀 Middleware - Redirecting to / (setup completed)`);
       return NextResponse.redirect(new URL("/", req.url));
     }
 
@@ -32,7 +48,7 @@ export default withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl;
-        
+
         // Allow public pages
         const publicPages = ["/", "/sign-in", "/terms", "/privacy", "/refund", "/search"];
         if (publicPages.includes(pathname)) {

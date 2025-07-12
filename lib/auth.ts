@@ -61,7 +61,7 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
     },
-    async jwt({ token, account, profile }) {
+    async jwt({ token, account, profile, trigger }) {
       // Initial sign in - store user data in token
       if (account && profile) {
         try {
@@ -86,11 +86,44 @@ export const authOptions: NextAuthOptions = {
           console.error("Error fetching user data in JWT callback:", error);
         }
       }
+
+      // Handle session updates (when update() is called)
+      if (trigger === "update" && token.email) {
+        try {
+          console.log("🚀 JWT callback - Session update triggered for:", token.email);
+          const dbUser = await prisma.user.findUnique({
+            where: { email: token.email },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              profileImage: true,
+              isSetupCompleted: true,
+              isActive: true,
+            },
+          });
+
+          if (dbUser) {
+            console.log("🚀 JWT callback - Updated user data:", {
+              email: dbUser.email,
+              isSetupCompleted: dbUser.isSetupCompleted,
+            });
+            token.id = dbUser.id;
+            token.isSetupCompleted = dbUser.isSetupCompleted;
+            token.isActive = dbUser.isActive;
+          }
+        } catch (error) {
+          console.error("Error updating user data in JWT callback:", error);
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
       try {
         if (token?.email) {
+          console.log("🚀 Session callback - Fetching user data for:", token.email);
+
           // Fetch fresh user data from database for each session
           const dbUser = await prisma.user.findUnique({
             where: { email: token.email },
@@ -105,6 +138,8 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (dbUser) {
+            console.log("🚀 Session callback - User found, isSetupCompleted:", dbUser.isSetupCompleted);
+
             // Populate session with complete database user data
             session.user = {
               id: dbUser.id,

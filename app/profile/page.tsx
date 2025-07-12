@@ -11,16 +11,20 @@ import { ProfileSetupForm } from "./components/profile-setup-form";
 
 export const metadata: Metadata = {
   title: "Complete Your Profile - SkillCircle",
-  description: "Complete your SkillCircle profile to start exchanging skills with our community.",
+  description:
+    "Complete your SkillCircle profile to start exchanging skills with our community.",
   openGraph: {
     title: "Complete Your Profile - SkillCircle",
-    description: "Complete your SkillCircle profile to start exchanging skills with our community.",
+    description:
+      "Complete your SkillCircle profile to start exchanging skills with our community.",
     type: "website",
   },
 };
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
+
+  console.log(`🚀 ~ page.tsx:25 ~ ProfilePage ~ session:`, session);
 
   // Redirect if not authenticated
   if (!session?.user) {
