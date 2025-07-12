@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,11 +7,296 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum SkillCategory {
+  TECHNOLOGY
+  BUSINESS
+  CREATIVE
+  LANGUAGES
+  MUSIC
+  SPORTS
+  COOKING
+  CRAFTS
+  HEALTH_WELLNESS
+  EDUCATION
+  AUTOMOTIVE
+  HOME_GARDEN
+  OTHER
+}
+
+enum ExperienceLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum AvailabilityType {
+  WEEKDAYS
+  WEEKENDS
+  EVENINGS
+  FLEXIBLE
+  SPECIFIC_TIMES
+}
+
+enum LearningPreference {
+  ONE_ON_ONE
+  GROUP_SESSIONS
+  ONLINE_ONLY
+  IN_PERSON_ONLY
+  HYBRID
+}
+
+enum ExchangeStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum TimeSlot {
+  EARLY_MORNING
+  MORNING
+  AFTERNOON
+  EVENING
+  LATE_EVENING
+  CUSTOM
+}
+
+enum SessionDuration {
+  THIRTY_MINUTES
+  ONE_HOUR
+  TWO_HOURS
+  THREE_HOURS
+  HALF_DAY
+  FULL_DAY
+  FLEXIBLE
+}
+
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  email     String   @unique
-  password  String
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  email        String  @unique
+  name         String
+  profileImage String
+  bio          String?
+  location     Json?
+
+  isActive   Boolean @default(true)
+  isVerified Boolean @default(false)
+
+  isPrivate          Boolean @default(false)
+  showLocation       Boolean @default(true)
+  showRatings        Boolean @default(true)
+  showSkillsOffered  Boolean @default(true)
+  showSkillsWanted   Boolean @default(true)
+  allowDirectContact Boolean @default(true)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  skillsOffered      SkillOffered[]
+  skillsWanted       SkillWanted[]
+  ratingsGiven       RatingGiven[]   @relation("RaterUser")
+  ratingsReceived    RatingGiven[]   @relation("RatedUser")
+  exchangesAsTeacher SkillExchange[] @relation("TeacherUser")
+  exchangesAsLearner SkillExchange[] @relation("LearnerUser")
+  availabilities     Availability[]
+
+  @@index([isPrivate, isActive])
+  @@map("users")
+}
+
+model Availability {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+
+  skillOfferedId String? @db.ObjectId
+  skillWantedId  String? @db.ObjectId
+  isGeneral      Boolean @default(false)
+
+  daysOfWeek      DayOfWeek[]
+  timeSlots       TimeSlot[]
+  customStartTime String?
+  customEndTime   String?
+
+  sessionDuration SessionDuration @default(ONE_HOUR)
+  minDuration     Int?
+  maxDuration     Int?
+
+  timezone    String
+  isRecurring Boolean @default(true)
+
+  specificDates Json?
+  excludeDates  Json?
+
+  validFrom  DateTime?
+  validUntil DateTime?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skillOffered SkillOffered? @relation(fields: [skillOfferedId], references: [id], onDelete: Cascade)
+  skillWanted  SkillWanted?  @relation(fields: [skillWantedId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillOfferedId, skillWantedId, isGeneral])
+  @@index([userId])
+  @@index([daysOfWeek])
+  @@index([timeSlots])
+  @@index([timezone])
+  @@index([isActive, isRecurring])
+  @@map("availabilities")
+}
+
+model SkillOffered {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+
+  title       String
+  description String
+  category    SkillCategory
+
+  experienceLevel   ExperienceLevel
+  yearsOfExperience Int?
+
+  preferredFormat LearningPreference[]
+  maxStudents     Int?
+
+  availability AvailabilityType[]
+
+  lookingFor String
+
+  isActive Boolean @default(true)
+  isPublic Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exchanges      SkillExchange[] @relation("OfferedSkill")
+  availabilities Availability[]
+
+  @@index([userId])
+  @@index([category])
+  @@index([isActive, isPublic])
+  @@map("skills_offered")
+}
+
+model SkillWanted {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+
+  title       String
+  description String
+  category    SkillCategory
+
+  desiredLevel   ExperienceLevel
+  currentLevel   ExperienceLevel?
+  learningFormat LearningPreference[]
+
+  offeringSkills String
+
+  timeCommitment String?
+  targetDate     DateTime?
+
+  isActive Boolean @default(true)
+  isPublic Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exchanges      SkillExchange[] @relation("WantedSkill")
+  availabilities Availability[]
+
+  @@index([userId])
+  @@index([category])
+  @@index([isActive, isPublic])
+  @@map("skills_wanted")
+}
+
+model SkillExchange {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  teacherId String @db.ObjectId
+  learnerId String @db.ObjectId
+
+  offeredSkillId String  @db.ObjectId
+  wantedSkillId  String? @db.ObjectId
+
+  exchangeTitle  String
+  agreementTerms String
+  status         ExchangeStatus @default(PENDING)
+
+  format         LearningPreference
+  estimatedHours Int?
+  scheduledStart DateTime?
+  actualStart    DateTime?
+  completedAt    DateTime?
+
+  progressNotes String?
+  milestones    Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teacher      User          @relation("TeacherUser", fields: [teacherId], references: [id])
+  learner      User          @relation("LearnerUser", fields: [learnerId], references: [id])
+  offeredSkill SkillOffered  @relation("OfferedSkill", fields: [offeredSkillId], references: [id])
+  wantedSkill  SkillWanted?  @relation("WantedSkill", fields: [wantedSkillId], references: [id])
+  ratings      RatingGiven[]
+
+  @@index([teacherId])
+  @@index([learnerId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("skill_exchanges")
+}
+
+model RatingGiven {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  raterId     String @db.ObjectId
+  ratedUserId String @db.ObjectId
+
+  exchangeId String? @db.ObjectId
+
+  rating      Int
+  reviewTitle String?
+  reviewText  String?
+
+  teachingQuality Int?
+  communication   Int?
+  reliability     Int?
+  patience        Int?
+  knowledgeLevel  Int?
+
+  isPublic   Boolean @default(true)
+  isVerified Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rater     User           @relation("RaterUser", fields: [raterId], references: [id])
+  ratedUser User           @relation("RatedUser", fields: [ratedUserId], references: [id])
+  exchange  SkillExchange? @relation(fields: [exchangeId], references: [id])
+
+  @@unique([raterId, ratedUserId, exchangeId])
+  @@index([ratedUserId])
+  @@index([raterId])
+  @@index([rating])
+  @@index([createdAt])
+  @@map("ratings_given")
 }
