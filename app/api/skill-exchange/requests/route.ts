@@ -11,10 +11,10 @@ import { z } from "zod";
 
 // Query parameters validation schema
 const requestsParamsSchema = z.object({
-  type: z.enum(["incoming", "outgoing", "all"]).optional().default("all"),
-  status: z.enum(["PENDING", "ACCEPTED", "IN_PROGRESS", "COMPLETED", "CANCELLED", "all"]).optional().default("all"),
-  page: z.string().optional().transform((val) => val ? parseInt(val, 10) : 1),
-  limit: z.string().optional().transform((val) => val ? parseInt(val, 10) : 10),
+  type: z.enum(["incoming", "outgoing", "all"]).nullable().optional().default("all"),
+  status: z.enum(["PENDING", "ACCEPTED", "IN_PROGRESS", "COMPLETED", "CANCELLED", "all"]).nullable().optional().default("all"),
+  page: z.string().nullable().optional().transform((val) => val ? parseInt(val, 10) : 1),
+  limit: z.string().nullable().optional().transform((val) => val ? parseInt(val, 10) : 10),
 });
 
 export async function GET(request: NextRequest) {
@@ -31,8 +31,8 @@ export async function GET(request: NextRequest) {
     // Parse and validate query parameters
     const { searchParams } = new URL(request.url);
     const params = requestsParamsSchema.parse({
-      type: searchParams.get("type"),
-      status: searchParams.get("status"),
+      type: searchParams.get("type") || "all",
+      status: searchParams.get("status") || "all",
       page: searchParams.get("page"),
       limit: searchParams.get("limit"),
     });
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build where clause based on request type
-    let where: any = {};
+    const where: any = {};
 
     if (type === "incoming") {
       // Requests where current user is the teacher
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Add status filter
-    if (status !== "all") {
+    if (status && status !== "all") {
       where.status = status;
     }
 

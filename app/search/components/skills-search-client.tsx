@@ -1,13 +1,8 @@
 "use client";
 
-/**
- * Skills Search Client Component for SkillCircle Platform
- * Handles interactive search, filtering, and display of skills
- */
-
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { Search, Filter, MapPin, Clock, User, Star } from "lucide-react";
+import { Search, Filter, MapPin, Star } from "lucide-react";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
@@ -203,27 +198,6 @@ function SkillsSearchContent() {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  // Format category display name
-  const getCategoryLabel = (category: string) => {
-    return (
-      SKILL_CATEGORIES.find((cat) => cat.value === category)?.label || category
-    );
-  };
-
-  // Format experience level display name
-  const getExperienceLevelLabel = (level: string) => {
-    return EXPERIENCE_LEVELS.find((lvl) => lvl.value === level)?.label || level;
-  };
-
-  // Get user location display
-  const getUserLocation = (user: SkillUser) => {
-    if (!user.showLocation || !user.location) return "Location not shared";
-    if (typeof user.location === "object" && user.location.city) {
-      return user.location.city;
-    }
-    return "Online";
   };
 
   // Show loading state until client is ready

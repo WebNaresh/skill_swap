@@ -18,7 +18,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ account, profile }) {
       try {
         if (account?.provider === "google" && profile?.email) {
           // Check if user exists in database

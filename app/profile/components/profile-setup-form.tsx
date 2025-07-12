@@ -9,7 +9,7 @@ import { useState } from "react";
 import { useForm, useFieldArray, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { signOut, signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -882,8 +882,8 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                     Ready to Join SkillCircle?
                   </h3>
                   <p className="text-sm text-sky-800 mb-4">
-                    You're all set! Click below to complete your profile and
-                    start connecting with the community.
+                    You&apos;re all set! Click below to complete your profile
+                    and start connecting with the community.
                   </p>
                   <div className="flex justify-between">
                     <Button

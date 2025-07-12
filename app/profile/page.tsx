@@ -45,7 +45,7 @@ export default async function ProfilePage() {
             Welcome to SkillCircle!
           </h1>
           <p className="text-xl text-gray-600 mb-2">
-            Let's complete your profile to get started
+            Let&apos;s complete your profile to get started
           </p>
           <p className="text-gray-500">
             This will help us match you with the perfect skill exchange partners
