@@ -138,11 +138,28 @@ export function StitchEngineClient() {
       // Read SVG file content
       const svgContent = await selectedFile.text();
 
+      // Validate SVG content
+      if (!svgContent.includes("<svg")) {
+        throw new Error("Invalid SVG file: No SVG element found");
+      }
+
       // Parse SVG to get conversion details
       const svgData = parseSvgContent(svgContent);
 
-      // Convert SVG to DST format
-      const dstContent = await mockSvgToDstConversion(svgContent);
+      if (svgData.paths.length === 0) {
+        throw new Error("No convertible shapes found in SVG");
+      }
+
+      // Convert SVG to DST format with timeout
+      const dstContent = (await Promise.race([
+        mockSvgToDstConversion(svgContent),
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error("Conversion timeout - SVG too complex")),
+            10000
+          )
+        ),
+      ])) as ArrayBuffer;
 
       clearInterval(progressInterval);
       setConversionProgress(100);
@@ -171,11 +188,15 @@ export function StitchEngineClient() {
         blob,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Conversion failed");
+      const errorMessage =
+        err instanceof Error ? err.message : "Conversion failed";
+      console.error("Conversion error:", err);
+
+      setError(errorMessage);
       setConversionResult({
         success: false,
         filename: "",
-        error: err instanceof Error ? err.message : "Conversion failed",
+        error: errorMessage,
       });
     } finally {
       setIsConverting(false);
@@ -844,48 +865,80 @@ function createFillStitches(points: Array<{ x: number; y: number }>): Array<{
     return createOutlineStitches(points);
   }
 
-  // Find bounding box
-  const minX = Math.min(...points.map((p) => p.x));
-  const maxX = Math.max(...points.map((p) => p.x));
-  const minY = Math.min(...points.map((p) => p.y));
-  const maxY = Math.max(...points.map((p) => p.y));
+  try {
+    // Find bounding box
+    const minX = Math.min(...points.map((p) => p.x));
+    const maxX = Math.max(...points.map((p) => p.x));
+    const minY = Math.min(...points.map((p) => p.y));
+    const maxY = Math.max(...points.map((p) => p.y));
 
-  const stitchSpacing = 2; // 2 units between fill lines
-  let isFirstStitch = true;
+    // Limit the size to prevent excessive processing
+    const maxDimension = 500; // Maximum dimension for fill processing
+    const width = maxX - minX;
+    const height = maxY - minY;
 
-  // Create horizontal fill lines
-  for (let y = minY; y <= maxY; y += stitchSpacing) {
-    const intersections = findLineIntersections(points, y);
+    if (width > maxDimension || height > maxDimension) {
+      // For very large shapes, just create outline stitches
+      console.warn("Shape too large for fill stitches, using outline only");
+      return createOutlineStitches(points);
+    }
 
-    if (intersections.length >= 2) {
-      // Sort intersections by x coordinate
-      intersections.sort((a, b) => a - b);
+    const stitchSpacing = Math.max(2, Math.min(width, height) / 50); // Adaptive spacing
+    let isFirstStitch = true;
+    let stitchCount = 0;
+    const maxStitches = 1000; // Limit total stitches to prevent overflow
 
-      // Create stitches between pairs of intersections
-      for (let i = 0; i < intersections.length; i += 2) {
-        if (i + 1 < intersections.length) {
-          const startX = intersections[i];
-          const endX = intersections[i + 1];
+    // Create horizontal fill lines
+    for (
+      let y = minY;
+      y <= maxY && stitchCount < maxStitches;
+      y += stitchSpacing
+    ) {
+      const intersections = findLineIntersections(points, y);
 
-          // Add stitches along the fill line
-          const lineStitches = createLineStitches(
-            { x: startX, y },
-            { x: endX, y },
-            isFirstStitch
-          );
+      if (intersections.length >= 2 && intersections.length <= 20) {
+        // Limit intersections
+        // Sort intersections by x coordinate
+        intersections.sort((a, b) => a - b);
 
-          stitches.push(...lineStitches);
-          isFirstStitch = false;
+        // Create stitches between pairs of intersections
+        for (
+          let i = 0;
+          i < intersections.length && stitchCount < maxStitches;
+          i += 2
+        ) {
+          if (i + 1 < intersections.length) {
+            const startX = intersections[i];
+            const endX = intersections[i + 1];
+
+            // Skip very small segments
+            if (Math.abs(endX - startX) < 1) continue;
+
+            // Add stitches along the fill line
+            const lineStitches = createLineStitches(
+              { x: startX, y },
+              { x: endX, y },
+              isFirstStitch
+            );
+
+            stitches.push(...lineStitches);
+            stitchCount += lineStitches.length;
+            isFirstStitch = false;
+          }
         }
       }
     }
+
+    // Add simplified outline for definition
+    const outlineStitches = createSimplifiedOutline(points);
+    stitches.push(...outlineStitches);
+
+    return stitches;
+  } catch (error) {
+    console.error("Error creating fill stitches:", error);
+    // Fallback to outline stitches
+    return createOutlineStitches(points);
   }
-
-  // Add outline for definition
-  const outlineStitches = createOutlineStitches(points);
-  stitches.push(...outlineStitches);
-
-  return stitches;
 }
 
 // Find intersections of a horizontal line with the polygon
@@ -895,20 +948,98 @@ function findLineIntersections(
 ): number[] {
   const intersections: number[] = [];
 
+  if (points.length < 2) return intersections;
+
   for (let i = 0; i < points.length; i++) {
     const p1 = points[i];
     const p2 = points[(i + 1) % points.length];
 
+    // Skip horizontal lines
+    if (Math.abs(p1.y - p2.y) < 0.001) continue;
+
     // Check if the line segment crosses the horizontal line
     if ((p1.y <= y && p2.y > y) || (p1.y > y && p2.y <= y)) {
       // Calculate intersection point
-      const t = (y - p1.y) / (p2.y - p1.y);
-      const x = p1.x + t * (p2.x - p1.x);
-      intersections.push(x);
+      const denominator = p2.y - p1.y;
+      if (Math.abs(denominator) > 0.001) {
+        // Avoid division by zero
+        const t = (y - p1.y) / denominator;
+        if (t >= 0 && t <= 1) {
+          // Ensure intersection is within the line segment
+          const x = p1.x + t * (p2.x - p1.x);
+          // Avoid duplicate intersections
+          if (!intersections.some((existing) => Math.abs(existing - x) < 0.1)) {
+            intersections.push(x);
+          }
+        }
+      }
     }
   }
 
   return intersections;
+}
+
+// Create simplified outline for complex shapes
+function createSimplifiedOutline(
+  points: Array<{ x: number; y: number }>
+): Array<{
+  x: number;
+  y: number;
+  type: "move" | "stitch" | "jump" | "end";
+}> {
+  const stitches: Array<{
+    x: number;
+    y: number;
+    type: "move" | "stitch" | "jump" | "end";
+  }> = [];
+
+  if (points.length === 0) return stitches;
+
+  // Simplify the outline by reducing points
+  const simplifiedPoints = simplifyPoints(points, 5); // Tolerance of 5 units
+
+  // Move to first point
+  stitches.push({
+    x: simplifiedPoints[0].x,
+    y: simplifiedPoints[0].y,
+    type: "jump",
+  });
+
+  // Create stitches along the simplified outline
+  for (let i = 1; i < simplifiedPoints.length; i++) {
+    const lineStitches = createLineStitches(
+      simplifiedPoints[i - 1],
+      simplifiedPoints[i],
+      false
+    );
+    stitches.push(...lineStitches.slice(1)); // Skip the first point as it's already added
+  }
+
+  return stitches;
+}
+
+// Simplify points using Douglas-Peucker algorithm (simplified version)
+function simplifyPoints(
+  points: Array<{ x: number; y: number }>,
+  tolerance: number
+): Array<{ x: number; y: number }> {
+  if (points.length <= 2) return points;
+
+  const simplified: Array<{ x: number; y: number }> = [];
+
+  // Take every nth point to reduce complexity
+  const step = Math.max(1, Math.floor(points.length / 20)); // Max 20 points
+
+  for (let i = 0; i < points.length; i += step) {
+    simplified.push(points[i]);
+  }
+
+  // Always include the last point if it's not already included
+  if (simplified[simplified.length - 1] !== points[points.length - 1]) {
+    simplified.push(points[points.length - 1]);
+  }
+
+  return simplified;
 }
 
 // Create outline stitches for non-filled shapes
