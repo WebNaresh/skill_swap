@@ -54,6 +54,12 @@ export function Navbar() {
                   My Requests
                 </Link>
                 <Link
+                  href="/stitch-engine"
+                  className="text-gray-600 hover:text-sky-600 transition-colors font-medium"
+                >
+                  Stitch Engine
+                </Link>
+                <Link
                   href="/opensource"
                   className="text-gray-600 hover:text-sky-600 transition-colors font-medium"
                 >
@@ -65,6 +71,7 @@ export function Navbar() {
                 <span className="text-gray-600 font-medium">Home</span>
                 <span className="text-gray-600 font-medium">Search Skills</span>
                 <span className="text-gray-600 font-medium">My Requests</span>
+                <span className="text-gray-600 font-medium">Stitch Engine</span>
               </>
             )}
           </div>
