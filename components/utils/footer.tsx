@@ -1,14 +1,34 @@
-import Link from "next/link"
-import Image from "next/image"
+import Link from "next/link";
+import Image from "next/image";
+
+const FOOTER_SECTIONS = [
+  {
+    title: "Platform",
+    links: [
+      { href: "/", label: "Home" },
+      { href: "/search", label: "Discover Skills" },
+      { href: "/request", label: "My Requests" },
+      { href: "/sign-in", label: "Sign In" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { href: "/terms", label: "Terms & Conditions" },
+      { href: "/privacy", label: "Privacy Policy" },
+      { href: "/refund", label: "Refund Policy" },
+    ],
+  },
+];
 
 export function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-200 mt-auto">
+    <footer className="mt-auto border-t bg-card/50">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-4">
           {/* Brand Section */}
-          <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
+          <div className="md:col-span-2">
+            <Link href="/" className="mb-4 inline-flex items-center gap-2.5">
               <Image
                 src="/web-app-manifest-192x192.png"
                 alt="SkillCircle Logo"
@@ -16,77 +36,47 @@ export function Footer() {
                 height={32}
                 className="rounded-lg"
               />
-              <span className="text-xl font-bold text-gray-900">SkillCircle</span>
+              <span className="text-lg font-bold tracking-tight">
+                Skill<span className="text-primary">Circle</span>
+              </span>
+            </Link>
+            <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
+              Where skills come full circle. Teach what you know, learn what you
+              need, and grow together with a community of curious people.
+            </p>
+          </div>
+
+          {FOOTER_SECTIONS.map((section) => (
+            <div key={section.title}>
+              <h3 className="mb-4 text-sm font-semibold">{section.title}</h3>
+              <ul className="space-y-2.5">
+                {section.links.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <p className="text-gray-600 mb-4 max-w-md">
-              Where skills come full circle. Connect with people who want to teach skills they know 
-              in exchange for learning skills they need.
-            </p>
-            <p className="text-sm text-gray-500">
-              © 2024 SkillCircle. All rights reserved.
-            </p>
-          </div>
-
-          {/* Platform Links */}
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Platform</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/" className="text-gray-600 hover:text-sky-600 transition-colors">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link href="/search" className="text-gray-600 hover:text-sky-600 transition-colors">
-                  Search Skills
-                </Link>
-              </li>
-              <li>
-                <Link href="/sign-in" className="text-gray-600 hover:text-sky-600 transition-colors">
-                  Sign In
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Legal Links */}
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Legal</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/terms" className="text-gray-600 hover:text-sky-600 transition-colors">
-                  Terms & Conditions
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className="text-gray-600 hover:text-sky-600 transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/refund" className="text-gray-600 hover:text-sky-600 transition-colors">
-                  Refund Policy
-                </Link>
-              </li>
-            </ul>
-          </div>
+          ))}
         </div>
 
         {/* Bottom Section */}
-        <div className="border-t border-gray-200 mt-8 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-4 text-sm text-gray-500">
-              <span>Built with ❤️ for the learning community</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>All systems operational</span>
-              </div>
-            </div>
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t pt-6 text-sm text-muted-foreground md:flex-row">
+          <p>© {new Date().getFullYear()} SkillCircle. All rights reserved.</p>
+          <div className="flex items-center gap-2">
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-60" />
+              <span className="relative inline-flex size-2 rounded-full bg-success" />
+            </span>
+            All systems operational
           </div>
         </div>
       </div>
     </footer>
-  )
+  );
 }

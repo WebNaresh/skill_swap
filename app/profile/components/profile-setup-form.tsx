@@ -44,7 +44,16 @@ import {
   Award,
   Globe,
   Tag,
+  Check,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const SETUP_STEPS = [
+  { label: "Basics", icon: User },
+  { label: "Availability", icon: Clock },
+  { label: "Privacy", icon: Shield },
+  { label: "Skills", icon: BookOpen },
+];
 
 interface User {
   id: string;
@@ -247,16 +256,55 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
   return (
     <FormProvider {...form}>
       <div className="space-y-6">
-        {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex justify-between text-sm text-gray-600 mb-2">
-            <span>
-              Step {currentStep} of {totalSteps}
-            </span>
-            <span>{Math.round(progress)}% Complete</span>
-          </div>
-          <Progress value={progress} className="h-2" />
-        </div>
+        {/* Step Indicator */}
+        <Card className="gap-4 py-5">
+          <CardContent className="space-y-4 px-5">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium">
+                Step {currentStep} of {totalSteps}:{" "}
+                <span className="text-primary">
+                  {SETUP_STEPS[currentStep - 1].label}
+                </span>
+              </span>
+              <span className="text-muted-foreground">
+                {Math.round(progress)}% complete
+              </span>
+            </div>
+            <Progress value={progress} className="h-2" />
+            <ol className="grid grid-cols-4 gap-2">
+              {SETUP_STEPS.map(({ label, icon: StepIcon }, index) => {
+                const step = index + 1;
+                const isDone = step < currentStep;
+                const isCurrent = step === currentStep;
+                return (
+                  <li
+                    key={label}
+                    className="flex flex-col items-center gap-1.5 text-center"
+                  >
+                    <span
+                      className={cn(
+                        "flex size-8 items-center justify-center rounded-full border text-xs font-semibold transition-colors",
+                        isDone && "border-primary bg-primary text-primary-foreground",
+                        isCurrent && "border-primary bg-accent text-accent-foreground ring-4 ring-primary/10",
+                        !isDone && !isCurrent && "bg-muted text-muted-foreground"
+                      )}
+                    >
+                      {isDone ? <Check className="size-4" /> : <StepIcon className="size-4" />}
+                    </span>
+                    <span
+                      className={cn(
+                        "hidden text-xs sm:block",
+                        isCurrent ? "font-medium text-foreground" : "text-muted-foreground"
+                      )}
+                    >
+                      {label}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+          </CardContent>
+        </Card>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Step 1: Basic Information */}
@@ -266,7 +314,7 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-sky-600" />
+                    <Users className="h-5 w-5 text-primary" />
                     Your Google Account
                   </CardTitle>
                 </CardHeader>
@@ -282,8 +330,8 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                       />
                     )}
                     <div>
-                      <p className="font-medium text-gray-900">{user.name}</p>
-                      <p className="text-gray-600">{user.email}</p>
+                      <p className="font-medium text-foreground">{user.name}</p>
+                      <p className="text-muted-foreground">{user.email}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -328,7 +376,7 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                 <Button
                   type="button"
                   onClick={nextStep}
-                  className="bg-sky-600 hover:bg-sky-700 text-white px-8 py-2"
+                  className="px-8"
                 >
                   Next: Availability
                 </Button>
@@ -342,10 +390,10 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-sky-600" />
+                    <Clock className="h-5 w-5 text-primary" />
                     Availability Setup
                   </CardTitle>
-                  <p className="text-gray-600">
+                  <p className="text-muted-foreground">
                     When are you available for skill exchanges?
                   </p>
                 </CardHeader>
@@ -484,7 +532,7 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                 <Button
                   type="button"
                   onClick={nextStep}
-                  className="bg-sky-600 hover:bg-sky-700 text-white px-8 py-2"
+                  className="px-8"
                 >
                   Next: Privacy Settings
                 </Button>
@@ -498,10 +546,10 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-sky-600" />
+                    <Shield className="h-5 w-5 text-primary" />
                     Privacy Settings
                   </CardTitle>
-                  <p className="text-gray-600">
+                  <p className="text-muted-foreground">
                     Control who can see your information
                   </p>
                 </CardHeader>
@@ -512,7 +560,7 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                         <Label className="text-base font-medium">
                           Private Profile
                         </Label>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-muted-foreground">
                           Only show your profile to matched users
                         </p>
                       </div>
@@ -524,7 +572,7 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                         <Label className="text-base font-medium">
                           Show Location
                         </Label>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-muted-foreground">
                           Display your location to other users
                         </p>
                       </div>
@@ -539,7 +587,7 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                         <Label className="text-base font-medium">
                           Show Skills Offered
                         </Label>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-muted-foreground">
                           Display skills you can teach
                         </p>
                       </div>
@@ -554,7 +602,7 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                         <Label className="text-base font-medium">
                           Show Skills Wanted
                         </Label>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-muted-foreground">
                           Display skills you want to learn
                         </p>
                       </div>
@@ -569,7 +617,7 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                         <Label className="text-base font-medium">
                           Show Ratings
                         </Label>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-muted-foreground">
                           Display your ratings and reviews
                         </p>
                       </div>
@@ -584,7 +632,7 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                         <Label className="text-base font-medium">
                           Allow Direct Contact
                         </Label>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-muted-foreground">
                           Let users contact you directly
                         </p>
                       </div>
@@ -609,7 +657,7 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                 <Button
                   type="button"
                   onClick={nextStep}
-                  className="bg-sky-600 hover:bg-sky-700 text-white px-8 py-2"
+                  className="px-8"
                 >
                   Next: Skills
                 </Button>
@@ -624,10 +672,10 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-sky-600" />
+                    <BookOpen className="h-5 w-5 text-primary" />
                     Skills You Can Offer
                   </CardTitle>
-                  <p className="text-gray-600">
+                  <p className="text-muted-foreground">
                     What skills can you teach others?
                   </p>
                 </CardHeader>
@@ -758,10 +806,10 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5 text-sky-600" />
+                    <Target className="h-5 w-5 text-primary" />
                     Skills You Want to Learn
                   </CardTitle>
-                  <p className="text-gray-600">
+                  <p className="text-muted-foreground">
                     What skills would you like to learn?
                   </p>
                 </CardHeader>
@@ -876,12 +924,12 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
               </Card>
 
               {/* Submit Section */}
-              <Card className="bg-sky-50 border-sky-200">
-                <CardContent className="pt-6">
-                  <h3 className="font-semibold text-sky-900 mb-2">
+              <Card className="border-primary/20 bg-accent/60">
+                <CardContent>
+                  <h3 className="font-semibold text-accent-foreground mb-2">
                     Ready to Join SkillCircle?
                   </h3>
-                  <p className="text-sm text-sky-800 mb-4">
+                  <p className="text-sm text-accent-foreground/80 mb-4">
                     You&apos;re all set! Click below to complete your profile
                     and start connecting with the community.
                   </p>
@@ -897,7 +945,7 @@ export function ProfileSetupForm({ user }: ProfileSetupFormProps) {
                     <Button
                       type="submit"
                       disabled={mutation.isPending}
-                      className="bg-sky-600 hover:bg-sky-700 text-white px-8 py-2"
+                      className="px-8"
                     >
                       {mutation.isPending ? "Setting up..." : "Complete Setup"}
                     </Button>

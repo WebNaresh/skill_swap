@@ -7,6 +7,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { Inbox } from "lucide-react";
+import { PageHeader } from "@/components/utils/page-header";
 import { SkillExchangeRequestsClient } from "./components/skill-exchange-requests-client";
 
 export const metadata: Metadata = {
@@ -33,22 +35,14 @@ export default async function SkillExchangeRequestsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-blue-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            My Skill Exchange Requests
-          </h1>
-          <p className="text-xl text-gray-600 mb-2">
-            Manage your incoming and outgoing skill exchange requests
-          </p>
-          <p className="text-gray-500">
-            Connect with community members and track your learning journey
-          </p>
-        </div>
-
-        {/* Skill Exchange Requests Client Component */}
+    <div className="bg-page min-h-[calc(100vh-4rem)]">
+      <div className="container mx-auto px-4 py-10">
+        <PageHeader
+          icon={Inbox}
+          eyebrow="Exchanges"
+          title="My Requests"
+          description="Manage incoming and outgoing skill exchange requests and track your learning journey."
+        />
         <SkillExchangeRequestsClient />
       </div>
     </div>

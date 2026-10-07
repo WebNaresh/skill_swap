@@ -1,11 +1,54 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { Search, Filter, MapPin, Star } from "lucide-react";
-import Image from "next/image";
-import { useQuery } from "@tanstack/react-query";
-import { Suspense } from "react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  BadgeCheck,
+  Clock,
+  MapPin,
+  RotateCcw,
+  Search,
+  SearchX,
+  Send,
+  Sparkles,
+  X,
+} from "lucide-react";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { EmptyState } from "@/components/utils/empty-state";
+import { PaginationControls } from "@/components/utils/pagination-controls";
+import {
+  EXCHANGE_FORMAT_LABELS,
+  EXPERIENCE_LEVEL_LABELS,
+  SKILL_CATEGORY_LABELS,
+  formatEnumLabel,
+} from "@/lib/skill-labels";
+import { cn } from "@/lib/utils";
 
 // Types
 interface SkillUser {
@@ -49,30 +92,40 @@ interface SearchResponse {
 }
 
 // Constants
+const ALL = "ALL";
+const SEARCH_DEBOUNCE_MS = 400;
+
 const SKILL_CATEGORIES = [
-  { value: "ALL", label: "All Categories" },
-  { value: "TECHNOLOGY", label: "Technology" },
-  { value: "BUSINESS", label: "Business" },
-  { value: "CREATIVE", label: "Creative Arts" },
-  { value: "LANGUAGES", label: "Languages" },
-  { value: "MUSIC", label: "Music" },
-  { value: "SPORTS", label: "Sports & Fitness" },
-  { value: "COOKING", label: "Cooking & Food" },
-  { value: "CRAFTS", label: "Crafts & DIY" },
-  { value: "HEALTH_WELLNESS", label: "Health & Wellness" },
-  { value: "EDUCATION", label: "Education" },
-  { value: "AUTOMOTIVE", label: "Automotive" },
-  { value: "HOME_GARDEN", label: "Home & Garden" },
-  { value: "OTHER", label: "Other" },
+  { value: ALL, label: "All categories" },
+  ...Object.entries(SKILL_CATEGORY_LABELS).map(([value, label]) => ({
+    value,
+    label,
+  })),
 ];
 
 const EXPERIENCE_LEVELS = [
-  { value: "ALL", label: "All Levels" },
-  { value: "BEGINNER", label: "Beginner" },
-  { value: "INTERMEDIATE", label: "Intermediate" },
-  { value: "ADVANCED", label: "Advanced" },
-  { value: "EXPERT", label: "Expert" },
+  { value: ALL, label: "All levels" },
+  ...Object.entries(EXPERIENCE_LEVEL_LABELS).map(([value, label]) => ({
+    value,
+    label,
+  })),
 ];
+
+const LEVEL_STYLES: Record<string, string> = {
+  BEGINNER: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  INTERMEDIATE: "bg-sky-50 text-sky-700 border-sky-200",
+  ADVANCED: "bg-violet-50 text-violet-700 border-violet-200",
+  EXPERT: "bg-amber-50 text-amber-700 border-amber-200",
+};
+
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
 
 // Wrapper component to handle Suspense boundary
 export function SkillsSearchClient() {
@@ -86,27 +139,39 @@ export function SkillsSearchClient() {
 // Loading fallback component
 function SearchLoadingFallback() {
   return (
-    <div className="space-y-8">
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="space-y-4">
-          <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
-          <div className="flex gap-4">
-            <div className="flex-1 h-10 bg-gray-200 rounded-lg animate-pulse"></div>
-            <div className="flex-1 h-10 bg-gray-200 rounded-lg animate-pulse"></div>
-            <div className="w-24 h-10 bg-gray-200 rounded-lg animate-pulse"></div>
-          </div>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="bg-white rounded-lg shadow-lg p-6">
-            <div className="h-6 bg-gray-200 rounded animate-pulse mb-4"></div>
-            <div className="h-8 bg-gray-200 rounded animate-pulse mb-2"></div>
-            <div className="h-16 bg-gray-200 rounded animate-pulse mb-4"></div>
-            <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
-          </div>
-        ))}
-      </div>
+    <div className="space-y-6">
+      <Card className="py-4">
+        <CardContent className="flex flex-col gap-3 px-4 lg:flex-row">
+          <Skeleton className="h-11 flex-1" />
+          <Skeleton className="h-11 lg:w-48" />
+          <Skeleton className="h-11 lg:w-40" />
+        </CardContent>
+      </Card>
+      <SkillGridSkeleton />
+    </div>
+  );
+}
+
+function SkillGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Card key={i}>
+          <CardContent className="space-y-4">
+            <div className="flex justify-between">
+              <Skeleton className="h-5 w-24 rounded-full" />
+              <Skeleton className="h-5 w-16" />
+            </div>
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-14 w-full" />
+            <div className="flex items-center gap-3">
+              <Skeleton className="size-10 rounded-full" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }
@@ -117,260 +182,303 @@ function SkillsSearchContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Initialize state with proper hydration handling
-  const [isClient, setIsClient] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("ALL");
-  const [selectedLevel, setSelectedLevel] = useState("ALL");
-  const [currentPage, setCurrentPage] = useState(1);
+  // Initial state comes from the URL so searches are shareable
+  const [searchQuery, setSearchQuery] = useState(
+    () => searchParams.get("query") || ""
+  );
+  const [debouncedQuery, setDebouncedQuery] = useState(searchQuery.trim());
+  const [selectedCategory, setSelectedCategory] = useState(
+    () => searchParams.get("category") || ALL
+  );
+  const [selectedLevel, setSelectedLevel] = useState(
+    () => searchParams.get("experienceLevel") || ALL
+  );
+  const [currentPage, setCurrentPage] = useState(() =>
+    Math.max(1, parseInt(searchParams.get("page") || "1") || 1)
+  );
 
-  // Handle client-side hydration
+  // Debounce typing so we don't hit the API on every keystroke
   useEffect(() => {
-    setIsClient(true);
-    setSearchQuery(searchParams.get("query") || "");
-    setSelectedCategory(searchParams.get("category") || "ALL");
-    setSelectedLevel(searchParams.get("experienceLevel") || "ALL");
-    setCurrentPage(parseInt(searchParams.get("page") || "1"));
-  }, [searchParams]);
+    const trimmed = searchQuery.trim();
+    if (trimmed === debouncedQuery) return;
 
-  // Fetch skills data - only run when client is ready
-  const { data, isLoading, error, refetch } = useQuery<SearchResponse>({
-    queryKey: [
-      "skills-search",
-      searchQuery,
-      selectedCategory,
-      selectedLevel,
-      currentPage,
-    ],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (searchQuery && searchQuery.trim())
-        params.set("query", searchQuery.trim());
-      if (selectedCategory !== "ALL") params.set("category", selectedCategory);
-      if (selectedLevel !== "ALL") params.set("experienceLevel", selectedLevel);
-      params.set("page", currentPage.toString());
-      params.set("limit", "12");
+    const timeout = setTimeout(() => {
+      setDebouncedQuery(trimmed);
+      setCurrentPage(1);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timeout);
+  }, [searchQuery, debouncedQuery]);
 
-      const response = await fetch(`/api/skills/search?${params}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch skills");
-      }
-      return response.json();
-    },
-    enabled: isClient, // Only run query when client is ready
-  });
+  const { data, isLoading, isFetching, error, refetch } =
+    useQuery<SearchResponse>({
+      queryKey: [
+        "skills-search",
+        debouncedQuery,
+        selectedCategory,
+        selectedLevel,
+        currentPage,
+      ],
+      queryFn: async () => {
+        const params = new URLSearchParams();
+        if (debouncedQuery) params.set("query", debouncedQuery);
+        if (selectedCategory !== ALL) params.set("category", selectedCategory);
+        if (selectedLevel !== ALL) params.set("experienceLevel", selectedLevel);
+        params.set("page", currentPage.toString());
+        params.set("limit", "12");
 
-  // Update URL when search parameters change
-  const updateURL = useCallback(() => {
-    if (!isClient) return; // Only update URL when client is ready
+        const response = await fetch(`/api/skills/search?${params}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch skills");
+        }
+        return response.json();
+      },
+      placeholderData: keepPreviousData,
+    });
 
+  // Keep the URL in sync with the active filters
+  useEffect(() => {
     const params = new URLSearchParams();
-    if (searchQuery && searchQuery.trim())
-      params.set("query", searchQuery.trim());
-    if (selectedCategory !== "ALL") params.set("category", selectedCategory);
-    if (selectedLevel !== "ALL") params.set("experienceLevel", selectedLevel);
+    if (debouncedQuery) params.set("query", debouncedQuery);
+    if (selectedCategory !== ALL) params.set("category", selectedCategory);
+    if (selectedLevel !== ALL) params.set("experienceLevel", selectedLevel);
     if (currentPage > 1) params.set("page", currentPage.toString());
 
     const newURL = params.toString() ? `${pathname}?${params}` : pathname;
-    router.replace(newURL);
-  }, [
-    isClient,
-    searchQuery,
-    selectedCategory,
-    selectedLevel,
-    currentPage,
-    pathname,
-    router,
-  ]);
+    router.replace(newURL, { scroll: false });
+  }, [debouncedQuery, selectedCategory, selectedLevel, currentPage, pathname, router]);
 
-  // Update URL when search parameters change
-  useEffect(() => {
-    updateURL();
-  }, [updateURL]);
-
-  // Handle search
-  const handleSearch = () => {
-    setCurrentPage(1);
-    refetch();
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = searchQuery.trim();
+    if (trimmed === debouncedQuery) {
+      refetch();
+    } else {
+      setDebouncedQuery(trimmed);
+      setCurrentPage(1);
+    }
   };
 
-  // Handle page change
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    setCurrentPage(1);
+  };
+
+  const handleLevelChange = (value: string) => {
+    setSelectedLevel(value);
+    setCurrentPage(1);
+  };
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Show loading state until client is ready
-  if (!isClient) {
-    return <SearchLoadingFallback />;
-  }
+  const clearFilters = () => {
+    setSearchQuery("");
+    setDebouncedQuery("");
+    setSelectedCategory(ALL);
+    setSelectedLevel(ALL);
+    setCurrentPage(1);
+  };
+
+  const activeFilters = [
+    debouncedQuery && {
+      key: "query",
+      label: `“${debouncedQuery}”`,
+      onRemove: () => {
+        setSearchQuery("");
+        setDebouncedQuery("");
+        setCurrentPage(1);
+      },
+    },
+    selectedCategory !== ALL && {
+      key: "category",
+      label: formatEnumLabel(selectedCategory, SKILL_CATEGORY_LABELS),
+      onRemove: () => handleCategoryChange(ALL),
+    },
+    selectedLevel !== ALL && {
+      key: "level",
+      label: formatEnumLabel(selectedLevel, EXPERIENCE_LEVEL_LABELS),
+      onRemove: () => handleLevelChange(ALL),
+    },
+  ].filter(Boolean) as { key: string; label: string; onRemove: () => void }[];
+
+  const pagination = data?.data.pagination;
+  const skills = data?.data.skills ?? [];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Search and Filters */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="space-y-4">
-          {/* Search Input */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <input
-              type="text"
-              placeholder="Search for skills, topics, or keywords..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-            />
-          </div>
-
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Category Filter */}
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category
-              </label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-              >
-                {SKILL_CATEGORIES.map((category) => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
+      <Card className="z-10 lg:sticky lg:top-20 border-border/70 bg-card/90 py-4 shadow-md backdrop-blur">
+        <CardContent className="space-y-3 px-4">
+          <form
+            onSubmit={handleSearchSubmit}
+            className="flex flex-col gap-3 lg:flex-row"
+          >
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="search"
+                aria-label="Search skills"
+                placeholder="Search for skills, topics, or keywords..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-11 pl-10 pr-10"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  aria-label="Clear search"
+                >
+                  <X className="size-3.5" />
+                </button>
+              )}
             </div>
 
-            {/* Experience Level Filter */}
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Experience Level
-              </label>
-              <select
-                value={selectedLevel}
-                onChange={(e) => setSelectedLevel(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-              >
-                {EXPERIENCE_LEVELS.map((level) => (
-                  <option key={level.value} value={level.value}>
-                    {level.label}
-                  </option>
-                ))}
-              </select>
+            <div className="grid grid-cols-2 gap-3 lg:flex">
+              <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+                <SelectTrigger
+                  aria-label="Category"
+                  className="h-11! w-full lg:w-48"
+                >
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SKILL_CATEGORIES.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedLevel} onValueChange={handleLevelChange}>
+                <SelectTrigger
+                  aria-label="Experience level"
+                  className="h-11! w-full lg:w-40"
+                >
+                  <SelectValue placeholder="Level" />
+                </SelectTrigger>
+                <SelectContent>
+                  {EXPERIENCE_LEVELS.map((level) => (
+                    <SelectItem key={level.value} value={level.value}>
+                      {level.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Search Button */}
-            <div className="flex items-end">
-              <button
-                onClick={handleSearch}
-                className="px-8 py-2 bg-sky-600 text-white rounded-lg font-semibold hover:bg-sky-700 transition-colors"
+            <Button
+              type="submit"
+              size="lg"
+              className="h-11 lg:px-8"
+              isLoading={isFetching}
+              leftIcon={<Search />}
+            >
+              Search
+            </Button>
+          </form>
+
+          {activeFilters.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-muted-foreground">Filters:</span>
+              {activeFilters.map((filter) => (
+                <Badge
+                  key={filter.key}
+                  variant="secondary"
+                  className="gap-1 rounded-full py-1 pl-2.5 pr-1"
+                >
+                  {filter.label}
+                  <button
+                    type="button"
+                    onClick={filter.onRemove}
+                    className="rounded-full p-0.5 hover:bg-background"
+                    aria-label={`Remove ${filter.label} filter`}
+                  >
+                    <X className="size-3" />
+                  </button>
+                </Badge>
+              ))}
+              <Button
+                variant="link"
+                size="sm"
+                className="h-auto px-1 text-xs"
+                onClick={clearFilters}
               >
-                Search
-              </button>
+                Clear all
+              </Button>
             </div>
-          </div>
-        </div>
-      </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Results */}
       {isLoading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600 mx-auto"></div>
-          <p className="text-gray-600 mt-4">Searching for skills...</p>
-        </div>
+        <SkillGridSkeleton />
       ) : error ? (
-        <div className="text-center py-12">
-          <p className="text-red-600 mb-4">
-            Failed to load skills. Please try again.
-          </p>
-          <button
-            onClick={() => refetch()}
-            className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
-          >
-            Retry
-          </button>
-        </div>
-      ) : data?.data.skills.length === 0 ? (
-        <div className="text-center py-12">
-          <Filter className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            No skills found
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Try adjusting your search criteria or browse all available skills.
-          </p>
-          <button
-            onClick={() => {
-              setSearchQuery("");
-              setSelectedCategory("ALL");
-              setSelectedLevel("ALL");
-              setCurrentPage(1);
-            }}
-            className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
-          >
-            Clear Filters
-          </button>
-        </div>
+        <EmptyState
+          icon={AlertTriangle}
+          tone="error"
+          title="Something went wrong"
+          description="We couldn't load skills right now. Please try again."
+          action={
+            <Button onClick={() => refetch()} leftIcon={<RotateCcw />}>
+              Try again
+            </Button>
+          }
+        />
+      ) : skills.length === 0 ? (
+        <EmptyState
+          icon={SearchX}
+          title="No skills found"
+          description="Try a different keyword or loosen your filters to see more results."
+          action={
+            activeFilters.length > 0 ? (
+              <Button variant="outline" onClick={clearFilters}>
+                Clear filters
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
         <>
           {/* Results Header */}
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {data?.data.pagination.totalCount} Skills Found
-            </h2>
-            <p className="text-gray-600">
-              Page {data?.data.pagination.currentPage} of{" "}
-              {data?.data.pagination.totalPages}
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">
+                {pagination?.totalCount}
+              </span>{" "}
+              skill{pagination?.totalCount === 1 ? "" : "s"} found
             </p>
+            {pagination && pagination.totalPages > 1 && (
+              <p className="text-sm text-muted-foreground">
+                Page {pagination.currentPage} of {pagination.totalPages}
+              </p>
+            )}
           </div>
 
           {/* Skills Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {data?.data.skills.map((skill) => (
+          <div
+            className={cn(
+              "grid grid-cols-1 gap-6 transition-opacity md:grid-cols-2 xl:grid-cols-3",
+              isFetching && "opacity-60"
+            )}
+          >
+            {skills.map((skill) => (
               <SkillCard key={skill.id} skill={skill} />
             ))}
           </div>
 
-          {/* Pagination */}
-          {data?.data.pagination.totalPages &&
-            data.data.pagination.totalPages > 1 && (
-              <div className="flex justify-center items-center space-x-2">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={!data.data.pagination.hasPrevPage}
-                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                >
-                  Previous
-                </button>
-
-                {Array.from(
-                  { length: data.data.pagination.totalPages },
-                  (_, i) => i + 1
-                ).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`px-4 py-2 rounded-lg ${
-                      page === currentPage
-                        ? "bg-sky-600 text-white"
-                        : "border border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={!data.data.pagination.hasNextPage}
-                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                >
-                  Next
-                </button>
-              </div>
-            )}
+          {pagination && (
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={pagination.totalPages}
+              onPageChange={handlePageChange}
+            />
+          )}
         </>
       )}
     </div>
@@ -382,48 +490,13 @@ function SkillCard({ skill }: { skill: Skill }) {
   const [isCreatingRequest, setIsCreatingRequest] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const router = useRouter();
-  const getCategoryLabel = (category: string) => {
-    const SKILL_CATEGORIES = [
-      { value: "TECHNOLOGY", label: "Technology" },
-      { value: "BUSINESS", label: "Business" },
-      { value: "CREATIVE", label: "Creative Arts" },
-      { value: "LANGUAGES", label: "Languages" },
-      { value: "MUSIC", label: "Music" },
-      { value: "SPORTS", label: "Sports & Fitness" },
-      { value: "COOKING", label: "Cooking & Food" },
-      { value: "CRAFTS", label: "Crafts & DIY" },
-      { value: "HEALTH_WELLNESS", label: "Health & Wellness" },
-      { value: "EDUCATION", label: "Education" },
-      { value: "AUTOMOTIVE", label: "Automotive" },
-      { value: "HOME_GARDEN", label: "Home & Garden" },
-      { value: "OTHER", label: "Other" },
-    ];
-    return (
-      SKILL_CATEGORIES.find((cat) => cat.value === category)?.label || category
-    );
-  };
-
-  const getExperienceLevelLabel = (level: string) => {
-    const levels: Record<string, string> = {
-      BEGINNER: "Beginner",
-      INTERMEDIATE: "Intermediate",
-      ADVANCED: "Advanced",
-      EXPERT: "Expert",
-    };
-    return levels[level] || level;
-  };
 
   const getUserLocation = (user: SkillUser) => {
-    if (!user.showLocation || !user.location) return "Location not shared";
+    if (!user.showLocation || !user.location) return null;
     if (typeof user.location === "object" && user.location.city) {
-      return user.location.city;
+      return user.location.city as string;
     }
     return "Online";
-  };
-
-  // Handle skill exchange request creation
-  const handleConnectRequest = () => {
-    setShowRequestModal(true);
   };
 
   const createSkillExchangeRequest = async (requestData: {
@@ -451,107 +524,129 @@ function SkillCard({ skill }: { skill: Skill }) {
         throw new Error(result.error || "Failed to create request");
       }
 
-      // Show success message
-      alert("Skill exchange request sent successfully!");
-
-      // Redirect to requests page
+      toast.success("Request sent!", {
+        description: `${skill.user.name} will be notified about your request.`,
+      });
+      setShowRequestModal(false);
       router.push("/request");
     } catch (error) {
       console.error("Error creating skill exchange request:", error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Failed to create request. Please try again."
-      );
+      toast.error("Couldn't send request", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to create request. Please try again.",
+      });
     } finally {
       setIsCreatingRequest(false);
-      setShowRequestModal(false);
     }
   };
 
+  const location = getUserLocation(skill.user);
+
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <span className="px-3 py-1 bg-sky-100 text-sky-700 text-sm font-medium rounded-full">
-          {getCategoryLabel(skill.category)}
-        </span>
-        <span className="text-xs text-gray-500 flex items-center gap-1">
-          <MapPin className="h-3 w-3" />
-          {getUserLocation(skill.user)}
-        </span>
-      </div>
-
-      {/* Skill Title */}
-      <h3 className="text-xl font-semibold text-gray-900 mb-2">
-        {skill.title}
-      </h3>
-
-      {/* Description */}
-      <p className="text-gray-600 mb-4 line-clamp-3">{skill.description}</p>
-
-      {/* Experience Level */}
-      <div className="flex items-center gap-2 mb-4">
-        <Star className="h-4 w-4 text-yellow-500" />
-        <span className="text-sm text-gray-600">
-          {getExperienceLevelLabel(skill.experienceLevel)}
-          {skill.yearsOfExperience && ` • ${skill.yearsOfExperience} years`}
-        </span>
-      </div>
-
-      {/* Teacher Info */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="relative">
-          <Image
-            src={skill.user.profileImage}
-            alt={skill.user.name}
-            width={40}
-            height={40}
-            className="w-10 h-10 rounded-full object-cover"
-          />
-          {skill.user.isVerified && (
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+    <Card className="group gap-0 border-border/70 py-0 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
+      <CardContent className="flex flex-1 flex-col gap-4 px-5 pt-5">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-2">
+          <Badge
+            variant="secondary"
+            className="rounded-full bg-accent text-accent-foreground"
+          >
+            {formatEnumLabel(skill.category, SKILL_CATEGORY_LABELS)}
+          </Badge>
+          {location && (
+            <span className="flex items-center gap-1 truncate text-xs text-muted-foreground">
+              <MapPin className="size-3 shrink-0" />
+              {location}
+            </span>
           )}
         </div>
+
+        {/* Skill Title & Description */}
         <div>
-          <p className="font-medium text-gray-900">{skill.user.name}</p>
-          {skill.user.bio && (
-            <p className="text-sm text-gray-500 line-clamp-1">
-              {skill.user.bio}
-            </p>
+          <h3 className="line-clamp-1 text-lg font-semibold transition-colors group-hover:text-primary">
+            {skill.title}
+          </h3>
+          <p className="mt-1.5 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+            {skill.description}
+          </p>
+        </div>
+
+        {/* Meta */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge
+            variant="outline"
+            className={cn("rounded-full", LEVEL_STYLES[skill.experienceLevel])}
+          >
+            <Sparkles />
+            {formatEnumLabel(skill.experienceLevel, EXPERIENCE_LEVEL_LABELS)}
+          </Badge>
+          {!!skill.yearsOfExperience && (
+            <Badge variant="outline" className="rounded-full text-muted-foreground">
+              <Clock />
+              {skill.yearsOfExperience} yr{skill.yearsOfExperience === 1 ? "" : "s"}
+            </Badge>
           )}
         </div>
-      </div>
 
-      {/* Action Button */}
-      <button
-        onClick={handleConnectRequest}
-        disabled={isCreatingRequest}
-        className="w-full px-4 py-2 bg-sky-600 text-white rounded-lg font-medium hover:bg-sky-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {isCreatingRequest ? "Creating Request..." : "Connect & Learn"}
-      </button>
+        {/* Teacher Info */}
+        <div className="mt-auto flex items-center gap-3 border-t pt-4">
+          <Avatar className="size-10">
+            <AvatarImage src={skill.user.profileImage} alt={skill.user.name} />
+            <AvatarFallback className="bg-muted text-xs font-semibold">
+              {getInitials(skill.user.name)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <p className="flex items-center gap-1 truncate text-sm font-medium">
+              {skill.user.name}
+              {skill.user.isVerified && (
+                <BadgeCheck
+                  className="size-4 shrink-0 text-primary"
+                  aria-label="Verified"
+                />
+              )}
+            </p>
+            {skill.user.bio && (
+              <p className="truncate text-xs text-muted-foreground">
+                {skill.user.bio}
+              </p>
+            )}
+          </div>
+        </div>
+      </CardContent>
 
-      {/* Request Modal */}
-      {showRequestModal && (
-        <SkillExchangeRequestModal
-          skill={skill}
-          onSubmit={createSkillExchangeRequest}
-          onClose={() => setShowRequestModal(false)}
-          isLoading={isCreatingRequest}
-        />
-      )}
-    </div>
+      <CardFooter className="px-5 pb-5 pt-4">
+        <Button
+          fullWidth
+          onClick={() => setShowRequestModal(true)}
+          rightIcon={<ArrowRight />}
+        >
+          Connect & Learn
+        </Button>
+      </CardFooter>
+
+      <SkillExchangeRequestModal
+        open={showRequestModal}
+        skill={skill}
+        onSubmit={createSkillExchangeRequest}
+        onClose={() => setShowRequestModal(false)}
+        isLoading={isCreatingRequest}
+      />
+    </Card>
   );
 }
 
 // Skill Exchange Request Modal Component
 function SkillExchangeRequestModal({
+  open,
   skill,
   onSubmit,
   onClose,
   isLoading,
 }: {
+  open: boolean;
   skill: Skill;
   onSubmit: (data: {
     exchangeTitle: string;
@@ -568,14 +663,22 @@ function SkillExchangeRequestModal({
     format: "ONLINE_ONLY",
     estimatedHours: "",
   });
+  const [errors, setErrors] = useState<{
+    exchangeTitle?: string;
+    agreementTerms?: string;
+  }>({});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.exchangeTitle.trim() || !formData.agreementTerms.trim()) {
-      alert("Please fill in all required fields");
-      return;
-    }
+    const nextErrors: typeof errors = {};
+    if (!formData.exchangeTitle.trim())
+      nextErrors.exchangeTitle = "Please add a title for this exchange";
+    if (!formData.agreementTerms.trim())
+      nextErrors.agreementTerms =
+        "Tell the teacher what you'd like to learn and what you offer";
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
 
     onSubmit({
       exchangeTitle: formData.exchangeTitle.trim(),
@@ -588,118 +691,135 @@ function SkillExchangeRequestModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Request Skill Exchange
-            </h3>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => !nextOpen && !isLoading && onClose()}
+    >
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Request skill exchange</DialogTitle>
+          <DialogDescription>
+            Introduce yourself and propose how you&apos;d like to swap skills.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex items-center gap-3 rounded-lg border bg-muted/50 p-3">
+          <Avatar className="size-10">
+            <AvatarImage src={skill.user.profileImage} alt={skill.user.name} />
+            <AvatarFallback className="text-xs font-semibold">
+              {getInitials(skill.user.name)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <p className="truncate font-medium">{skill.title}</p>
+            <p className="truncate text-sm text-muted-foreground">
+              with {skill.user.name}
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+          <div className="space-y-2">
+            <Label htmlFor={`exchange-title-${skill.id}`}>
+              Exchange title <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id={`exchange-title-${skill.id}`}
+              value={formData.exchangeTitle}
+              onChange={(e) =>
+                setFormData({ ...formData, exchangeTitle: e.target.value })
+              }
+              placeholder="e.g., Learn Python Programming"
+              aria-invalid={!!errors.exchangeTitle}
               disabled={isLoading}
-            >
-              ✕
-            </button>
+            />
+            {errors.exchangeTitle && (
+              <p className="text-xs text-destructive">{errors.exchangeTitle}</p>
+            )}
           </div>
 
-          <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-            <h4 className="font-medium text-gray-900">{skill.title}</h4>
-            <p className="text-sm text-gray-600">by {skill.user.name}</p>
+          <div className="space-y-2">
+            <Label htmlFor={`agreement-terms-${skill.id}`}>
+              Your proposal <span className="text-destructive">*</span>
+            </Label>
+            <Textarea
+              id={`agreement-terms-${skill.id}`}
+              value={formData.agreementTerms}
+              onChange={(e) =>
+                setFormData({ ...formData, agreementTerms: e.target.value })
+              }
+              rows={4}
+              placeholder="Describe what you'd like to learn and what you can offer in return..."
+              aria-invalid={!!errors.agreementTerms}
+              disabled={isLoading}
+            />
+            {errors.agreementTerms && (
+              <p className="text-xs text-destructive">{errors.agreementTerms}</p>
+            )}
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Exchange Title *
-              </label>
-              <input
-                type="text"
-                value={formData.exchangeTitle}
-                onChange={(e) =>
-                  setFormData({ ...formData, exchangeTitle: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
-                placeholder="e.g., Learn Python Programming"
-                required
-                disabled={isLoading}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Agreement Terms *
-              </label>
-              <textarea
-                value={formData.agreementTerms}
-                onChange={(e) =>
-                  setFormData({ ...formData, agreementTerms: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
-                rows={3}
-                placeholder="Describe what you'd like to learn and what you can offer in return..."
-                required
-                disabled={isLoading}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Preferred Format
-              </label>
-              <select
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Preferred format</Label>
+              <Select
                 value={formData.format}
-                onChange={(e) =>
-                  setFormData({ ...formData, format: e.target.value })
+                onValueChange={(value) =>
+                  setFormData({ ...formData, format: value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                 disabled={isLoading}
               >
-                <option value="ONLINE_ONLY">Online Only</option>
-                <option value="IN_PERSON_ONLY">In Person Only</option>
-                <option value="HYBRID">Hybrid (Online + In Person)</option>
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(EXCHANGE_FORMAT_LABELS).map(
+                    ([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    )
+                  )}
+                </SelectContent>
+              </Select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Estimated Hours (Optional)
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor={`estimated-hours-${skill.id}`}>
+                Estimated hours{" "}
+                <span className="font-normal text-muted-foreground">
+                  (optional)
+                </span>
+              </Label>
+              <Input
+                id={`estimated-hours-${skill.id}`}
                 type="number"
                 value={formData.estimatedHours}
                 onChange={(e) =>
                   setFormData({ ...formData, estimatedHours: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                 placeholder="e.g., 10"
                 min="1"
                 max="100"
                 disabled={isLoading}
               />
             </div>
+          </div>
 
-            <div className="flex gap-3 pt-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                disabled={isLoading}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="flex-1 px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors disabled:opacity-50"
-                disabled={isLoading}
-              >
-                {isLoading ? "Sending..." : "Send Request"}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          <DialogFooter className="pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" isLoading={isLoading} leftIcon={<Send />}>
+              {isLoading ? "Sending..." : "Send request"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

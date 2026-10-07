@@ -120,6 +120,11 @@ function Button({
     fullWidth && "w-full"
   );
 
+  // Slot requires a single child, so render it untouched when asChild is set
+  if (asChild) {
+    return <Slot data-slot="button" className={buttonClasses} {...props} />;
+  }
+
   // Render order based on the effective icon position
   const renderLeftContent = () => {
     if (effectiveIconPosition === "right") {
